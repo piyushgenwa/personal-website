@@ -27,6 +27,7 @@ const SHEETS = [
   { name: 'moodboard', bg: [10, 18, 20], blobs: [[255, 77, 94], [53, 214, 196]] },
   { name: 'trend-pulse', bg: [12, 24, 22], blobs: [[255, 160, 46], [255, 77, 94]] },
   { name: 'sprite-mart', bg: [10, 19, 20], blobs: [[255, 77, 94], [211, 222, 217]] },
+  { name: 'growth-secretary', bg: [11, 23, 25], blobs: [[53, 214, 196], [255, 160, 46]] },
 ];
 
 const CRC_TABLE = (() => {

@@ -162,6 +162,41 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: 'growth-secretary',
+    title: 'Growth Secretary',
+    tagline: 'an ops assistant that reads an order update and tells you the next move',
+    year: '2026',
+    role: 'Design and build',
+    status: 'Shipped',
+    stack: ['Gemini', 'Vercel Edge Functions', 'HTML/JS'],
+    thumb: '/projects/growth-secretary.png',
+    accent: 'aqua',
+    summary:
+      'A B2B sourcing team runs each order through a 20-step operating model spanning a CRM, a sourcing platform, spreadsheets, and Slack. Growth Secretary takes a plain-text update from a growth lead, resolves it against the model, and returns one decision card: what step this is, what happens next, and what to prep — never a blocker.',
+    blocks: [
+      {
+        heading: 'The problem',
+        body: [
+          'The operating model was correct but lived only in people\'s heads: which of four order lanes an update belonged to, which of eight recurring jobs it triggered, and which system of record needed updating. Growth leads either knew this cold or asked around, and every order touched five different systems that did not talk to each other.',
+        ],
+      },
+      {
+        heading: 'Approach',
+        body: [
+          'Modeled the operating model explicitly first — as an interactive HTML deck mapping every party, system, and pain point across current and future state — before writing any assistant logic, so the assistant\'s reasoning had a spec to be checked against rather than being reverse-engineered from chat transcripts.',
+          'The assistant itself is a single long system prompt encoding the four order lanes, the twenty-step sequence, and the eight jobs, plus worked examples per job. It grounds each message to an order ID, infers the lane and step, and drafts the artifacts (Slack posts, payment-doc checklists) for the lead to send — flagging missing inputs rather than stopping.',
+        ],
+      },
+      {
+        heading: 'Status',
+        body: [
+          'Shipped as a chat tool the team uses directly. The open piece is the cost/ROI model quantifying time freed per lead — the assistant work came first because it was the part that could be validated by using it.',
+        ],
+      },
+    ],
+    links: [{ label: 'Live demo', href: 'https://sourcy-growth-secretary.vercel.app' }],
+  },
+  {
     slug: 'spec-diff',
     title: 'Spec Diff',
     tagline: 'catches the revision nobody mentioned',
