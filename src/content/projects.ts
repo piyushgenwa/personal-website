@@ -38,6 +38,47 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    slug: 'trend-pulse',
+    title: 'Trend Pulse',
+    tagline: 'a standing pipeline that finds what a market is about to buy',
+    year: '2026',
+    role: 'Design and build',
+    status: 'In progress',
+    stack: ['TypeScript', 'Claude Agent SDK', 'Next.js', 'Postgres'],
+    thumb: '/projects/trend-pulse.png',
+    accent: 'sodium',
+    featured: true,
+    summary:
+      'A weekly pipeline that pulls live trending-product signals across six data providers for a given category and market, clusters them into named trends, and publishes a branded report — then folds the result into a cross-linked knowledge base that answers questions across every report ever run.',
+    metrics: [
+      { value: '6', label: 'signal providers per run' },
+      { value: '98', label: 'trends tracked across 3 reports' },
+      { value: '2', label: 'markets and categories launched with' },
+    ],
+    blocks: [
+      {
+        heading: 'The problem',
+        body: [
+          'Knowing what is about to trend in, say, water bottles in the Philippines means reading through search data, marketplace bestseller lists, and social signals by hand, every week, per market. Nobody was doing this consistently because it does not scale as a manual habit.',
+          'A one-off report is also throwaway — the moment the next one runs, the last one is forgotten, so "have we seen this trend before, under a different name" has no answer.',
+        ],
+      },
+      {
+        heading: 'Approach',
+        body: [
+          'The pipeline runs as a set of cooperating agents: one collector per provider (Ensemble Data, SerpAPI, Oxylabs, Jungle Scout, SellerApp, TMAPI) fetches raw signals in parallel, a synthesizer dedupes and clusters them into scored, ranked trend categories with evidence products, and a report builder writes the copy and publishes it.',
+          'Every finished report is then ingested into a markdown knowledge base — one file per trend, category, market, and brand, cross-linked wiki-style — so a recurring trend under a new name gets a new sighting appended to its existing file rather than a duplicate. A chat layer sits on top so teammates can ask "what\'s trending in Mexico" without reading raw JSON.',
+        ],
+      },
+      {
+        heading: 'Status',
+        body: [
+          'Running for beauty, water bottles, supplements, and men\'s hair loss across a handful of markets. The open question is provider coverage — some categories have thin signal from two or three of the six sources, and the synthesizer needs to say so explicitly rather than ranking on whatever data happened to show up.',
+        ],
+      },
+    ],
+  },
+  {
     slug: 'ledger',
     title: 'Ledger',
     tagline: 'quote reconciliation for buyers who live in spreadsheets',
