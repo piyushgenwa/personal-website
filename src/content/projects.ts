@@ -34,9 +34,92 @@ export interface Project {
   links?: { label: string; href: string }[];
   /** Pulls the card to double width in the grid. Use for one or two, not all. */
   featured?: boolean;
+  /** Optional real-output gallery, rendered below the blocks. */
+  screenshots?: { src: string; alt: string }[];
 }
 
 export const projects: Project[] = [
+  {
+    slug: 'trend-pulse',
+    title: 'Trend Pulse',
+    tagline: 'a standing pipeline that finds what a market is about to buy',
+    year: '2026',
+    role: 'Design and build',
+    status: 'In progress',
+    stack: ['TypeScript', 'Claude Agent SDK', 'Next.js', 'Postgres'],
+    thumb: '/projects/trend-pulse.png',
+    accent: 'sodium',
+    featured: true,
+    summary:
+      'A weekly pipeline that pulls live trending-product signals across six data providers for a given category and market, clusters them into named trends, and publishes a branded report — then folds the result into a cross-linked knowledge base that answers questions across every report ever run.',
+    metrics: [
+      { value: '6', label: 'signal providers per run' },
+      { value: '98', label: 'trends tracked across 3 reports' },
+      { value: '2', label: 'markets and categories launched with' },
+    ],
+    blocks: [
+      {
+        heading: 'The problem',
+        body: [
+          'Knowing what is about to trend in, say, water bottles in the Philippines means reading through search data, marketplace bestseller lists, and social signals by hand, every week, per market. Nobody was doing this consistently because it does not scale as a manual habit.',
+          'A one-off report is also throwaway — the moment the next one runs, the last one is forgotten, so "have we seen this trend before, under a different name" has no answer.',
+        ],
+      },
+      {
+        heading: 'Approach',
+        body: [
+          'The pipeline runs as a set of cooperating agents: one collector per provider (Ensemble Data, SerpAPI, Oxylabs, Jungle Scout, SellerApp, TMAPI) fetches raw signals in parallel, a synthesizer dedupes and clusters them into scored, ranked trend categories with evidence products, and a report builder writes the copy and publishes it.',
+          'Every finished report is then ingested into a markdown knowledge base — one file per trend, category, market, and brand, cross-linked wiki-style — so a recurring trend under a new name gets a new sighting appended to its existing file rather than a duplicate. A chat layer sits on top so teammates can ask "what\'s trending in Mexico" without reading raw JSON.',
+        ],
+      },
+      {
+        heading: 'Status',
+        body: [
+          'Running for beauty, water bottles, supplements, and men\'s hair loss across a handful of markets. The open question is provider coverage — some categories have thin signal from two or three of the six sources, and the synthesizer needs to say so explicitly rather than ranking on whatever data happened to show up.',
+        ],
+      },
+    ],
+    screenshots: [
+      { src: '/projects/trend-pulse-mexico-supplements.jpg', alt: 'Mexico supplements trend report, week of June 25, 2026' },
+      { src: '/projects/trend-pulse-thailand-hair-loss.jpg', alt: "Thailand men's hair loss trend report, week of June 29, 2026" },
+      { src: '/projects/trend-pulse-philippines-tumblers.jpg', alt: 'Philippines water bottles & tumblers trend report, week of July 16, 2026' },
+    ],
+  },
+  {
+    slug: 'sprite-mart',
+    title: 'Sprite Mart',
+    tagline: 'a character stays the character across every pose',
+    year: '2026',
+    role: 'Design and build',
+    status: 'In progress',
+    stack: ['TypeScript', 'Next.js', 'Gemini', 'ONNX'],
+    thumb: '/projects/sprite-mart.png',
+    accent: 'flare',
+    summary:
+      'A pixel-art sprite generator: describe a character once, then generate Idle, Run, Jump, and Attack poses that are recognizably the same character with a real transparent background, not a flat color a game engine has to key out by hand.',
+    blocks: [
+      {
+        heading: 'The problem',
+        body: [
+          'Image models are good at a single sprite and bad at a set. Ask for "the same knight, now jumping" and you get a different knight — different palette, different proportions, different armor — which is useless for a sprite sheet where every pose has to read as one character.',
+          'The models also can\'t emit a real alpha channel. They paint a background color instead, and naive keying leaves feathered, speckled edges that look wrong at pixel-art scale.',
+        ],
+      },
+      {
+        heading: 'Approach',
+        body: [
+          'The first generated sprite is locked as a character reference; every later pose is sent back to the image model with that reference image and an instruction to keep the character and change only the pose, so identity holds across the set.',
+          'Backgrounds are stripped server-side with ML background removal, then the alpha channel is binarized to a hard 0/255 cutoff so edges stay crisp instead of feathered, and a connected-component despeckle pass drops the halo of stray pixels segmentation leaves behind.',
+        ],
+      },
+      {
+        heading: 'Status',
+        body: [
+          'Character consistency and real transparency both work end to end. Open problems: the background-removal model is AGPL-licensed, fine for a prototype but blocking for any commercial release; output is 1024×1024 and CSS-pixelated rather than true NxN pixel art; and the character reference lives in memory only, so it\'s gone on refresh — no accounts or storage yet.',
+        ],
+      },
+    ],
+  },
   {
     slug: 'ledger',
     title: 'Ledger',

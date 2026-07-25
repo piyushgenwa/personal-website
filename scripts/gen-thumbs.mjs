@@ -25,6 +25,8 @@ const SHEETS = [
   { name: 'spec-diff', bg: [9, 20, 18], blobs: [[255, 160, 46], [255, 77, 94]] },
   { name: 'quota', bg: [11, 24, 26], blobs: [[53, 214, 196], [255, 160, 46]] },
   { name: 'moodboard', bg: [10, 18, 20], blobs: [[255, 77, 94], [53, 214, 196]] },
+  { name: 'trend-pulse', bg: [12, 24, 22], blobs: [[255, 160, 46], [255, 77, 94]] },
+  { name: 'sprite-mart', bg: [10, 19, 20], blobs: [[255, 77, 94], [211, 222, 217]] },
 ];
 
 const CRC_TABLE = (() => {
