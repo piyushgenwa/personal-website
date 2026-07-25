@@ -86,6 +86,41 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: 'sprite-mart',
+    title: 'Sprite Mart',
+    tagline: 'a character stays the character across every pose',
+    year: '2026',
+    role: 'Design and build',
+    status: 'In progress',
+    stack: ['TypeScript', 'Next.js', 'Gemini', 'ONNX'],
+    thumb: '/projects/sprite-mart.png',
+    accent: 'flare',
+    summary:
+      'A pixel-art sprite generator: describe a character once, then generate Idle, Run, Jump, and Attack poses that are recognizably the same character with a real transparent background, not a flat color a game engine has to key out by hand.',
+    blocks: [
+      {
+        heading: 'The problem',
+        body: [
+          'Image models are good at a single sprite and bad at a set. Ask for "the same knight, now jumping" and you get a different knight — different palette, different proportions, different armor — which is useless for a sprite sheet where every pose has to read as one character.',
+          'The models also can\'t emit a real alpha channel. They paint a background color instead, and naive keying leaves feathered, speckled edges that look wrong at pixel-art scale.',
+        ],
+      },
+      {
+        heading: 'Approach',
+        body: [
+          'The first generated sprite is locked as a character reference; every later pose is sent back to the image model with that reference image and an instruction to keep the character and change only the pose, so identity holds across the set.',
+          'Backgrounds are stripped server-side with ML background removal, then the alpha channel is binarized to a hard 0/255 cutoff so edges stay crisp instead of feathered, and a connected-component despeckle pass drops the halo of stray pixels segmentation leaves behind.',
+        ],
+      },
+      {
+        heading: 'Status',
+        body: [
+          'Character consistency and real transparency both work end to end. Open problems: the background-removal model is AGPL-licensed, fine for a prototype but blocking for any commercial release; output is 1024×1024 and CSS-pixelated rather than true NxN pixel art; and the character reference lives in memory only, so it\'s gone on refresh — no accounts or storage yet.',
+        ],
+      },
+    ],
+  },
+  {
     slug: 'ledger',
     title: 'Ledger',
     tagline: 'quote reconciliation for buyers who live in spreadsheets',
