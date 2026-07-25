@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <!-- The flutes stop across the middle: the band wiped clear. -->
+    <mask id="wiped">
+      <rect width="32" height="32" fill="#fff" />
+      <rect y="12.5" width="32" height="7" fill="#000" />
+    </mask>
+  </defs>
+
+  <rect width="32" height="32" fill="#08110f" />
+
+  <!-- The specimen -->
+  <circle cx="12.5" cy="19" r="8" fill="#ffa02e" />
+  <circle cx="21" cy="10.5" r="6" fill="#35d6c4" />
+
+  <!-- The case -->
+  <g fill="#08110f" opacity="0.6" mask="url(#wiped)">
+    <rect x="2" width="1.7" height="32" />
+    <rect x="7" width="1.7" height="32" />
+    <rect x="12" width="1.7" height="32" />
+    <rect x="17" width="1.7" height="32" />
+    <rect x="22" width="1.7" height="32" />
+    <rect x="27" width="1.7" height="32" />
+  </g>
+</svg>

@@ -1,0 +1,339 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   VITRINE — design tokens
+   Cold industrial glass, warm organic life behind it.
+   ========================================================================== */
+
+@theme {
+  /* Palette */
+  --color-ink: #08110f; /* vitrine base — cold green-black */
+  --color-panel: #0f1e1f; /* raised surface */
+  --color-panel-2: #16292a; /* hover / inset surface */
+  --color-frost: #d3ded9; /* cool bone — primary text */
+  --color-frost-dim: #7f918c; /* secondary text */
+  --color-frost-faint: #46564f; /* hairlines, tertiary */
+  --color-sodium: #ffa02e; /* warm amber — primary accent */
+  --color-flare: #ff4d5e; /* hot coral */
+  --color-aqua: #35d6c4; /* cool teal — interactive */
+
+  /* Type */
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* The flute pitch is the grid. Everything aligns to it. */
+  --flute: 34px;
+  /* Where the glass is wiped clear. The window onto the specimen. */
+  --band-open-top: 30%;
+  --band-open-bot: 58%;
+
+  --ease-glass: cubic-bezier(0.16, 0.84, 0.28, 1);
+}
+
+/* Registered so the wipe can animate. Unregistered custom props don't tween. */
+@property --band-top {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+@property --band-bot {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Narrow screens get a finer pitch, or the ribbing reads as fat stripes.
+   `html:root` outspecifies the `:root` that @theme emits, so this wins
+   regardless of which rule the bundler emits first. */
+@media (max-width: 640px) {
+  html:root {
+    --flute: 21px;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-frost);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-sodium);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-aqua);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   Type roles
+   ========================================================================== */
+
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+  font-variation-settings: 'wdth' 90;
+}
+
+/* Small caps mono, used for anything the reader scans rather than reads:
+   indices, stack tags, years, labels. */
+.t-data {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-frost-dim);
+}
+
+.t-lede {
+  font-size: clamp(1.0625rem, 1.6vw, 1.3125rem);
+  line-height: 1.5;
+  color: var(--color-frost-dim);
+  text-wrap: pretty;
+}
+
+/* ==========================================================================
+   FLUTED GLASS
+   FlutedGlass (the shader) is an image filter — it samples an
+   HTMLImageElement, so it cannot refract the live WebGL canvas underneath it.
+   For the hero we build the pane in CSS instead, which does composite against
+   live content: specular flute lighting + a two-depth backdrop blur.
+   ========================================================================== */
+
+.glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  /* Ribbed specular lighting: bright edge, dark valley, per flute. */
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0) 0px,
+    rgb(255 255 255 / 0.11) 2px,
+    rgb(255 255 255 / 0.02) 7px,
+    rgb(0 0 0 / 0.2) calc(var(--flute) * 0.47),
+    rgb(255 255 255 / 0.02) calc(var(--flute) - 8px),
+    rgb(255 255 255 / 0.15) calc(var(--flute) - 3px),
+    rgb(0 0 0 / 0.34) calc(var(--flute) - 1px),
+    rgb(255 255 255 / 0) var(--flute)
+  );
+
+  backdrop-filter: blur(5px) saturate(1.3) brightness(1.05);
+  -webkit-backdrop-filter: blur(5px) saturate(1.3) brightness(1.05);
+}
+
+/* Fluted glass is blurrier in the valleys than at the ridges. A second pane
+   masked to the valleys only gives that depth for one extra composite. */
+.glass-valleys {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+  mask-image: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    #000 calc(var(--flute) * 0.28),
+    #000 calc(var(--flute) * 0.66),
+    transparent var(--flute)
+  );
+}
+
+/* The signature: a wiped-clear band where the glass is absent and the
+   metaballs read sharp. Feathered so it looks rubbed, not cut. */
+.glass-banded {
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0,
+    #000 calc(var(--band-top) - 4%),
+    transparent var(--band-top),
+    transparent var(--band-bot),
+    #000 calc(var(--band-bot) + 4%),
+    #000 100%
+  );
+}
+
+.glass-valleys.glass-banded {
+  mask-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      #000 calc(var(--flute) * 0.28),
+      #000 calc(var(--flute) * 0.66),
+      transparent var(--flute)
+    ),
+    linear-gradient(
+      to bottom,
+      #000 0,
+      #000 calc(var(--band-top) - 4%),
+      transparent var(--band-top),
+      transparent var(--band-bot),
+      #000 calc(var(--band-bot) + 4%),
+      #000 100%
+    );
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+/* ==========================================================================
+   Flute-pitch rules — carries the pane across the whole page
+   ========================================================================== */
+
+.flute-rules {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(211 222 217 / 0.05) 0px,
+    rgb(211 222 217 / 0.05) 1px,
+    transparent 1px,
+    transparent calc(var(--flute) * 4)
+  );
+}
+
+.hairline {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--color-frost-faint) 0%,
+    rgb(70 86 79 / 0.25) 60%,
+    transparent 100%
+  );
+  border: 0;
+}
+
+/* ==========================================================================
+   Motion — page-load sequence
+   ========================================================================== */
+
+@keyframes wipe {
+  from {
+    --band-top: 44%;
+    --band-bot: 44%;
+  }
+  to {
+    --band-top: var(--band-open-top);
+    --band-bot: var(--band-open-bot);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.9rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.anim-wipe {
+  --band-top: var(--band-open-top);
+  --band-bot: var(--band-open-bot);
+  animation: wipe 1.5s var(--ease-glass) 0.35s both;
+}
+
+/* Label plate: the type below the window sits on this, so it never has to
+   compete with a metaball for contrast. */
+.hero-scrim {
+  position: absolute;
+  inset: calc(var(--band-open-bot) - 3%) 0 0 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(8 17 15 / 0) 0%,
+    rgb(8 17 15 / 0.58) 17%,
+    rgb(8 17 15 / 0.89) 41%,
+    rgb(8 17 15 / 0.975) 66%,
+    var(--color-ink) 100%
+  );
+}
+
+.anim-rise {
+  animation: rise 0.9s var(--ease-glass) both;
+}
+
+.anim-fade {
+  animation: fade 1.4s ease-out both;
+}
+
+/* Scroll-reveal, progressively enhanced by an IntersectionObserver. */
+.reveal {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 0.8s var(--ease-glass),
+    transform 0.8s var(--ease-glass);
+}
+
+.reveal[data-shown='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .anim-wipe {
+    --band-top: var(--band-open-top);
+    --band-bot: var(--band-open-bot);
+  }
+}
