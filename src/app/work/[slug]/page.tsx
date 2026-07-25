@@ -120,6 +120,26 @@ export default async function ProjectPage({ params }: Params) {
           ))}
         </div>
 
+        {project.screenshots && project.screenshots.length > 0 && (
+          <div className="mt-16 border-t border-frost-faint/40 pt-8">
+            <h2 className="t-data">Sample output</h2>
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+              {project.screenshots.map((shot) => (
+                <a
+                  key={shot.src}
+                  href={shot.src}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block overflow-hidden border border-frost-faint/40 transition-opacity hover:opacity-80"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={shot.src} alt={shot.alt} className="aspect-[4/3] w-full object-cover object-top" />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
         {project.links && project.links.length > 0 && (
           <div className="mt-16 flex flex-wrap gap-x-7 gap-y-3 border-t border-frost-faint/40 pt-8">
             {project.links.map((link) => (

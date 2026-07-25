@@ -34,6 +34,8 @@ export interface Project {
   links?: { label: string; href: string }[];
   /** Pulls the card to double width in the grid. Use for one or two, not all. */
   featured?: boolean;
+  /** Optional real-output gallery, rendered below the blocks. */
+  screenshots?: { src: string; alt: string }[];
 }
 
 export const projects: Project[] = [
@@ -76,6 +78,11 @@ export const projects: Project[] = [
           'Running for beauty, water bottles, supplements, and men\'s hair loss across a handful of markets. The open question is provider coverage — some categories have thin signal from two or three of the six sources, and the synthesizer needs to say so explicitly rather than ranking on whatever data happened to show up.',
         ],
       },
+    ],
+    screenshots: [
+      { src: '/projects/trend-pulse-mexico-supplements.jpg', alt: 'Mexico supplements trend report, week of June 25, 2026' },
+      { src: '/projects/trend-pulse-thailand-hair-loss.jpg', alt: "Thailand men's hair loss trend report, week of June 29, 2026" },
+      { src: '/projects/trend-pulse-philippines-tumblers.jpg', alt: 'Philippines water bottles & tumblers trend report, week of July 16, 2026' },
     ],
   },
   {
