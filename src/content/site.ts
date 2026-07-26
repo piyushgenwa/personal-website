@@ -6,7 +6,7 @@
 export const site = {
   name: 'Piyush Genwa',
   // Shown in the hero's clear band, split so the line break is deliberate.
-  headline: ['Software that survives', 'contact with a real supply chain.'],
+  headline: ['Product Manager at the intersection of', 'Empathy and Taste'],
   role: 'Product engineer',
   org: 'Sourcy',
   location: 'Surat, IN',
