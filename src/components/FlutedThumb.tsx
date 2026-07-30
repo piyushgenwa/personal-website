@@ -55,20 +55,18 @@ export function FlutedThumb({ src, revealed }: { src: string; revealed: boolean 
       className="absolute inset-0 h-full w-full"
       image={src}
       fit="cover"
-      // Flute pitch tightens slightly as it clears, so the ribs feel like they
-      // are pulling apart rather than just fading.
-      size={lerp(0.24, 0.42, t)}
+      // Broad, low-contrast ribs preserve thumbnail legibility at rest.
+      size={lerp(0.38, 0.42, t)}
       angle={0}
       shape="lines"
       distortionShape="prism"
-      distortion={lerp(0.58, 0.03, t)}
-      // Kept low at rest: heavy shadows/highlights wash the image to grey fog
-      // instead of reading as coloured light behind ribbed glass.
-      shadows={lerp(0.34, 0.08, t)}
-      highlights={lerp(0.14, 0.04, t)}
-      blur={lerp(0.16, 0, t)}
+      distortion={lerp(0.12, 0.02, t)}
+      // Keep lighting and grain quiet; hover resolves the image completely.
+      shadows={lerp(0.1, 0.04, t)}
+      highlights={lerp(0.07, 0.03, t)}
+      blur={lerp(0.025, 0, t)}
       edges={0.18}
-      grainOverlay={lerp(0.12, 0.04, t)}
+      grainOverlay={lerp(0.04, 0.02, t)}
       colorBack="#08110f"
       colorShadow="#030c0b"
       colorHighlight="#a8c8c1"
