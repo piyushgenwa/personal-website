@@ -17,9 +17,11 @@
   --color-flare: #ff4d5e; /* hot coral */
   --color-aqua: #35d6c4; /* cool teal — interactive */
 
-  /* Type */
+  /* Type — two families, not three. Bricolage is variable, so display and body
+     are separated by its `wdth` axis (90 vs 100) rather than by a second face.
+     One less webfont, and the voice stays consistent down the page. */
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
   /* The flute pitch is the grid. Everything aligns to it. */
@@ -72,6 +74,10 @@ body {
   background: var(--color-ink);
   color: var(--color-frost);
   font-family: var(--font-body);
+  /* Full width + regular weight is the reading cut of the family. Display sets
+     itself apart by narrowing to wdth 90, not by switching typeface. */
+  font-variation-settings: 'wdth' 100;
+  font-weight: 400;
   font-size: 1rem;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -103,6 +109,16 @@ a {
   font-weight: 700;
   line-height: 0.9;
   letter-spacing: -0.035em;
+  font-variation-settings: 'wdth' 90;
+}
+
+/* Same voice, safe to wrap. 0.9 is a hero setting — at card size it collides
+   the moment a title runs to two lines. */
+.t-display-sm {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
   font-variation-settings: 'wdth' 90;
 }
 

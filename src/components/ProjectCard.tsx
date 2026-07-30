@@ -1,40 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import { FlutedThumb } from './FlutedThumb';
+import { useEffect, useState } from 'react';
+import { SpecimenPlate } from './SpecimenPlate';
+import { STATUS_COLOR } from '@/content/status';
 import type { Project } from '@/content/projects';
-
-const ACCENT: Record<Project['accent'], string> = {
-  sodium: 'var(--color-sodium)',
-  flare: 'var(--color-flare)',
-  aqua: 'var(--color-aqua)',
-};
 
 export function ProjectCard({ project }: { project: Project }) {
   const [engaged, setEngaged] = useState(false);
-  const [inView, setInView] = useState(false);
   const [pointerHovers, setPointerHovers] = useState(true);
-  const ref = useRef<HTMLElement>(null);
-
-  // Each shader is its own WebGL context, so only spin one up once the card is
-  // close to the viewport. Once mounted it stays mounted.
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: '300px' },
-    );
-    io.observe(node);
-    return () => io.disconnect();
-  }, []);
 
   // Touch devices never hover, so the glass would stay shut forever. Leave it
   // clear there instead.
@@ -47,10 +21,10 @@ export function ProjectCard({ project }: { project: Project }) {
   }, []);
 
   const revealed = engaged || !pointerHovers;
+  const live = project.status === 'In progress';
 
   return (
     <article
-      ref={ref}
       className="group relative"
       onMouseEnter={() => setEngaged(true)}
       onMouseLeave={() => setEngaged(false)}
@@ -68,25 +42,31 @@ export function ProjectCard({ project }: { project: Project }) {
             project.featured ? 'aspect-[4/3] sm:aspect-[21/9]' : 'aspect-[4/3]'
           }`}
         >
-          {/* Poster underneath so the card is never empty pre-hydration. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={project.thumb}
-            alt=""
+          <SpecimenPlate project={project} />
+
+          {/* The case. Same CSS pane as the hero — it composites over live DOM,
+              so the plate underneath can be type rather than a raster texture.
+              Clears on hover/focus: the specimen is what you came to see. */}
+          <div
             aria-hidden="true"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="glass transition-opacity duration-700 ease-[var(--ease-glass)]"
+            style={{ opacity: revealed ? 0 : 1 }}
           />
-          {inView && <FlutedThumb src={project.thumb} revealed={revealed} />}
+          <div
+            aria-hidden="true"
+            className="glass-valleys transition-opacity duration-700 ease-[var(--ease-glass)]"
+            style={{ opacity: revealed ? 0 : 1 }}
+          />
 
           {/* Accent rule that grows as the glass clears. */}
           <span
             className="absolute bottom-0 left-0 z-10 h-px w-0 transition-[width] duration-700 ease-[var(--ease-glass)] group-hover:w-full group-focus-within:w-full"
-            style={{ background: ACCENT[project.accent] }}
+            style={{ background: STATUS_COLOR[project.status] }}
           />
         </div>
 
         <div className="flex items-baseline justify-between gap-4 pt-4">
-          <h3 className="t-display text-[clamp(1.35rem,2.1vw,1.85rem)]">{project.title}</h3>
+          <h3 className="t-display-sm text-[clamp(1.35rem,2.1vw,1.85rem)]">{project.title}</h3>
           <span className="t-data shrink-0">{project.year}</span>
         </div>
 
@@ -95,7 +75,16 @@ export function ProjectCard({ project }: { project: Project }) {
         </p>
 
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <span className="t-data" style={{ color: ACCENT[project.accent] }}>
+          <span
+            className="t-data inline-flex items-center gap-1.5"
+            style={{ color: STATUS_COLOR[project.status] }}
+          >
+            {live && (
+              <span
+                aria-hidden="true"
+                className="inline-block h-1.5 w-1.5 rounded-full bg-current"
+              />
+            )}
             {project.status}
           </span>
           <span className="h-2.5 w-px bg-frost-faint" aria-hidden="true" />

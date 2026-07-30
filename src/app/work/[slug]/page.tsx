@@ -5,17 +5,12 @@ import { ProjectHero } from '@/components/ProjectHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { getProject, projects } from '@/content/projects';
 import { site } from '@/content/site';
+import { STATUS_COLOR } from '@/content/status';
 
 /**
  * The project template. Every entry in `projects` renders through this page —
  * to add a case study, add data, not markup.
  */
-
-const ACCENT = {
-  sodium: 'var(--color-sodium)',
-  flare: 'var(--color-flare)',
-  aqua: 'var(--color-aqua)',
-} as const;
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -41,7 +36,9 @@ export default async function ProjectPage({ params }: Params) {
 
   const index = projects.findIndex((p) => p.slug === project.slug);
   const next = projects[(index + 1) % projects.length];
-  const accent = ACCENT[project.accent];
+  // Lead with a real screenshot where one exists; the generated thumb is only
+  // ever a stand-in.
+  const lead = project.screenshots?.[0] ?? { src: project.thumb, alt: `${project.title} interface` };
 
   return (
     <main>
@@ -53,7 +50,7 @@ export default async function ProjectPage({ params }: Params) {
             </span>{' '}
             {site.name}
           </Link>
-          <span className="t-data" style={{ color: accent }}>
+          <span className="t-data" style={{ color: STATUS_COLOR[project.status] }}>
             {project.status}
           </span>
         </nav>
@@ -86,7 +83,7 @@ export default async function ProjectPage({ params }: Params) {
       </div>
 
       <div className="mx-auto max-w-[1240px] px-6 sm:px-10">
-        <ProjectHero src={project.thumb} alt={`${project.title} interface`} />
+        <ProjectHero src={lead.src} alt={lead.alt} />
       </div>
 
       {project.metrics && project.metrics.length > 0 && (
@@ -94,9 +91,9 @@ export default async function ProjectPage({ params }: Params) {
           <dl className="grid grid-cols-1 gap-x-8 gap-y-8 border-t border-frost-faint/40 pt-8 sm:grid-cols-3">
             {project.metrics.map((metric) => (
               <div key={metric.label}>
-                <dt className="t-display text-[clamp(1.75rem,3.4vw,2.75rem)]" style={{ color: accent }}>
-                  {metric.value}
-                </dt>
+                {/* Size already carries these. Tinting them a per-project hue
+                    only competed with the status accent for attention. */}
+                <dt className="t-display text-[clamp(1.75rem,3.4vw,2.75rem)]">{metric.value}</dt>
                 <dd className="t-data mt-2">{metric.label}</dd>
               </div>
             ))}
