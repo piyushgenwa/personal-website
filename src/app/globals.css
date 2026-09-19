@@ -1,46 +1,34 @@
 @import 'tailwindcss';
 
 /* ==========================================================================
-   VITRINE — design tokens
-   Cold industrial glass, warm organic life behind it.
+   THE BOOK — design tokens
+   One typeface (Newsreader), one accent (rubric red, the colour a printer used
+   for headings), warm paper on a darker desk. Nothing glows, nothing moves
+   unless a page is turned.
    ========================================================================== */
 
 @theme {
-  /* Palette */
-  --color-ink: #08110f; /* vitrine base — cold green-black */
-  --color-panel: #0f1e1f; /* raised surface */
-  --color-panel-2: #16292a; /* hover / inset surface */
-  --color-frost: #d3ded9; /* cool bone — primary text */
-  --color-frost-dim: #7f918c; /* secondary text */
-  --color-frost-faint: #46564f; /* hairlines, tertiary */
-  --color-sodium: #ffa02e; /* warm amber — primary accent */
-  --color-flare: #ff4d5e; /* hot coral */
-  --color-aqua: #35d6c4; /* cool teal — interactive */
+  --color-desk: #cbbfa6;
+  --color-paper: #f6efdf;
+  --color-paper-shade: #e9dfc7;
+  --color-ink: #221d16;
+  --color-ink-soft: #5d5346;
+  --color-ink-faint: #a29680;
+  --color-rubric: #8c3325;
+  --color-cloth: #4b2019;
+  --color-foil: #dcbd7c;
 
-  /* Type */
-  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
-
-  /* The flute pitch is the grid. Everything aligns to it. */
-  --flute: 34px;
-  /* Where the glass is wiped clear. The window onto the specimen. */
-  --band-open-top: 30%;
-  --band-open-bot: 58%;
-
-  --ease-glass: cubic-bezier(0.16, 0.84, 0.28, 1);
+  --font-serif: var(--font-newsreader), 'Iowan Old Style', Georgia, serif;
 }
 
-/* Registered so the wipe can animate. Unregistered custom props don't tween. */
-@property --band-top {
-  syntax: '<percentage>';
-  inherits: true;
-  initial-value: 50%;
-}
-@property --band-bot {
-  syntax: '<percentage>';
-  inherits: true;
-  initial-value: 50%;
+:root {
+  color-scheme: light;
+
+  /* Fine paper fibre. Cheap, tiles seamlessly, no image request. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .24 0 0 0 0 .12 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  --leaf-w: 62rem;
+  --pad-x: clamp(1.4rem, 5.5vw, 4.5rem);
 }
 
 /* ==========================================================================
@@ -58,282 +46,532 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-/* Narrow screens get a finer pitch, or the ribbing reads as fat stripes.
-   `html:root` outspecifies the `:root` that @theme emits, so this wins
-   regardless of which rule the bundler emits first. */
-@media (max-width: 640px) {
-  html:root {
-    --flute: 21px;
-  }
-}
-
 body {
   margin: 0;
-  background: var(--color-ink);
-  color: var(--color-frost);
-  font-family: var(--font-body);
-  font-size: 1rem;
+  background-color: var(--color-desk);
+  background-image: var(--grain);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  font-size: clamp(1.0625rem, 0.98rem + 0.3vw, 1.25rem);
   line-height: 1.6;
+  hyphens: auto;
+  text-wrap: pretty;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: var(--color-sodium);
-  color: var(--color-ink);
-}
-
-:focus-visible {
-  outline: 2px solid var(--color-aqua);
-  outline-offset: 3px;
-  border-radius: 2px;
+  background: color-mix(in srgb, var(--color-rubric) 24%, transparent);
 }
 
 a {
   color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-rubric);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+/* Small caps done properly, with a little tracking. */
+.sc {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.09em;
+  font-feature-settings: 'smcp', 'c2sc';
+}
+
+.link {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-ink) 30%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.link:hover {
+  color: var(--color-rubric);
+  text-decoration-color: currentColor;
+}
+
+/* ==========================================================================
+   The desk and the cover
+   ========================================================================== */
+
+.desk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  padding: clamp(1rem, 4vw, 3rem) clamp(0.5rem, 3vw, 2rem) clamp(3rem, 8vw, 6rem);
+}
+
+.cover {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(2.2rem, 7vw, 4rem) clamp(2rem, 8vw, 4.5rem) clamp(2rem, 6vw, 3.25rem)
+    clamp(3rem, 10vw, 5.5rem);
+  text-align: center;
+  color: var(--color-foil);
+  background-color: var(--color-cloth);
+  background-image:
+    /* the weave of the cloth */
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.07) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 3px),
+    var(--grain),
+    /* light falling from the upper left */
+    linear-gradient(115deg, rgb(255 235 200 / 0.09), transparent 45%, rgb(0 0 0 / 0.22));
+  border-radius: 3px 10px 10px 3px;
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.25),
+    0 1px 0 rgb(255 255 255 / 0.25),
+    0 2px 3px rgb(50 30 10 / 0.35),
+    0 22px 40px -14px rgb(50 30 10 / 0.55),
+    0 44px 70px -30px rgb(50 30 10 / 0.45);
+}
+
+/* The hinge — a groove down the left, where the board meets the spine. */
+.cover::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 clamp(1.7rem, 6.4vw, 3.4rem);
+  width: 1.2rem;
+  background: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 0.38),
+    rgb(0 0 0 / 0.05) 35%,
+    rgb(255 255 255 / 0.07) 60%,
+    transparent
+  );
+  border-left: 1px solid rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+
+/* The blind-stamped frame. */
+.cover::after {
+  content: '';
+  position: absolute;
+  inset: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.5rem)
+    clamp(3.4rem, 11vw, 6rem);
+  border: 1px solid color-mix(in srgb, var(--color-foil) 70%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--color-foil) 40%, transparent);
+  outline-offset: 4px;
+  pointer-events: none;
+}
+
+.cover > * {
+  position: relative;
+  z-index: 1;
+}
+
+.foil {
+  color: var(--color-foil);
+  text-shadow:
+    0 -1px 0 rgb(0 0 0 / 0.45),
+    0 1px 0 rgb(255 240 200 / 0.18);
+}
+
+.cover-name {
+  font-size: clamp(2.3rem, 8vw, 3.6rem);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.cover-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.5em 1.1em 0.55em;
+  font-size: 1.05rem;
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--color-foil) 55%, transparent);
+  transition: background 0.2s, color 0.2s;
+}
+.cover-open:hover,
+.cover-open:focus-visible {
+  background: var(--color-foil);
+  color: var(--color-cloth);
+  text-shadow: none;
+}
+
+/* ==========================================================================
+   The leaf — one page
+   ========================================================================== */
+
+.leaf {
+  position: relative;
+  width: min(100%, var(--leaf-w));
+  padding: clamp(1.4rem, 3vw, 2.4rem) var(--pad-x) clamp(1.6rem, 3vw, 2.4rem);
+  background-color: var(--color-paper);
+  background-image:
+    var(--grain),
+    /* the curve of the page as it falls into the gutter */
+    linear-gradient(90deg, rgb(70 45 10 / 0.16), rgb(70 45 10 / 0.04) 2.6rem, transparent 5rem);
+  border-radius: 2px 5px 5px 2px;
+  /* the fore-edge: a few hundred sheets, suggested by four */
+  box-shadow:
+    1px 1px 0 var(--color-paper-shade),
+    2px 2px 0 #f1e9d6,
+    3px 3px 0 #ddd2b8,
+    4px 4px 0 #efe6d1,
+    5px 5px 0 #d6caae,
+    0 12px 24px -8px rgb(50 30 10 / 0.35),
+    0 30px 50px -24px rgb(50 30 10 / 0.35);
+  scroll-margin-top: 1.25rem;
+}
+
+/* Verso pages (even folios) put the gutter on the right. */
+.leaf[data-side='verso'] {
+  background-image:
+    var(--grain),
+    linear-gradient(270deg, rgb(70 45 10 / 0.16), rgb(70 45 10 / 0.04) 2.6rem, transparent 5rem);
+  border-radius: 5px 2px 2px 5px;
+  box-shadow:
+    -1px 1px 0 var(--color-paper-shade),
+    -2px 2px 0 #f1e9d6,
+    -3px 3px 0 #ddd2b8,
+    -4px 4px 0 #efe6d1,
+    -5px 5px 0 #d6caae,
+    0 12px 24px -8px rgb(50 30 10 / 0.35),
+    0 30px 50px -24px rgb(50 30 10 / 0.35);
+}
+
+.leaf-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 0.7rem;
+  font-size: 0.9rem;
+  color: var(--color-ink-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 22%, transparent);
+}
+.leaf-head a {
   text-decoration: none;
 }
-
-/* ==========================================================================
-   Type roles
-   ========================================================================== */
-
-.t-display {
-  font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: -0.035em;
-  font-variation-settings: 'wdth' 90;
+.leaf-head a:hover {
+  color: var(--color-rubric);
 }
 
-/* Small caps mono, used for anything the reader scans rather than reads:
-   indices, stack tags, years, labels. */
-.t-data {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-frost-dim);
+.leaf-body {
+  padding-block: clamp(2rem, 5vw, 3.5rem) clamp(2rem, 5vw, 3rem);
 }
 
-.t-lede {
-  font-size: clamp(1.0625rem, 1.6vw, 1.3125rem);
-  line-height: 1.5;
-  color: var(--color-frost-dim);
-  text-wrap: pretty;
+.leaf-folio {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--color-ink-soft);
+  font-variant-numeric: oldstyle-nums;
+  letter-spacing: 0.06em;
+}
+.leaf-folio::before,
+.leaf-folio::after {
+  content: '—';
+  margin-inline: 0.7em;
+  color: var(--color-ink-faint);
 }
 
 /* ==========================================================================
-   FLUTED GLASS
-   FlutedGlass (the shader) is an image filter — it samples an
-   HTMLImageElement, so it cannot refract the live WebGL canvas underneath it.
-   For the hero we build the pane in CSS instead, which does composite against
-   live content: specular flute lighting + a two-depth backdrop blur.
+   Typographic furniture
    ========================================================================== */
 
-.glass {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  /* Ribbed specular lighting: bright edge, dark valley, per flute. */
-  background: repeating-linear-gradient(
-    90deg,
-    rgb(255 255 255 / 0) 0px,
-    rgb(255 255 255 / 0.11) 2px,
-    rgb(255 255 255 / 0.02) 7px,
-    rgb(0 0 0 / 0.2) calc(var(--flute) * 0.47),
-    rgb(255 255 255 / 0.02) calc(var(--flute) - 8px),
-    rgb(255 255 255 / 0.15) calc(var(--flute) - 3px),
-    rgb(0 0 0 / 0.34) calc(var(--flute) - 1px),
-    rgb(255 255 255 / 0) var(--flute)
-  );
-
-  backdrop-filter: blur(5px) saturate(1.3) brightness(1.05);
-  -webkit-backdrop-filter: blur(5px) saturate(1.3) brightness(1.05);
+.kicker {
+  font-size: 1rem;
+  color: var(--color-rubric);
 }
 
-/* Fluted glass is blurrier in the valleys than at the ridges. A second pane
-   masked to the valleys only gives that depth for one extra composite. */
-.glass-valleys {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  backdrop-filter: blur(13px);
-  -webkit-backdrop-filter: blur(13px);
-  mask-image: repeating-linear-gradient(
-    90deg,
-    transparent 0px,
-    #000 calc(var(--flute) * 0.28),
-    #000 calc(var(--flute) * 0.66),
-    transparent var(--flute)
-  );
+.chapter-title {
+  margin-top: 0.15em;
+  font-size: clamp(3rem, 9vw, 5.75rem);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
-/* The signature: a wiped-clear band where the glass is absent and the
-   metaballs read sharp. Feathered so it looks rubbed, not cut. */
-.glass-banded {
-  mask-image: linear-gradient(
-    to bottom,
-    #000 0,
-    #000 calc(var(--band-top) - 4%),
-    transparent var(--band-top),
-    transparent var(--band-bot),
-    #000 calc(var(--band-bot) + 4%),
-    #000 100%
-  );
+.folio-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
 }
 
-.glass-valleys.glass-banded {
-  mask-image:
-    repeating-linear-gradient(
-      90deg,
-      transparent 0px,
-      #000 calc(var(--flute) * 0.28),
-      #000 calc(var(--flute) * 0.66),
-      transparent var(--flute)
-    ),
-    linear-gradient(
-      to bottom,
-      #000 0,
-      #000 calc(var(--band-top) - 4%),
-      transparent var(--band-top),
-      transparent var(--band-bot),
-      #000 calc(var(--band-bot) + 4%),
-      #000 100%
-    );
-  mask-composite: intersect;
-  -webkit-mask-composite: source-in;
+.fleuron {
+  display: block;
+  margin-block: 2.25rem;
+  text-align: center;
+  color: var(--color-rubric);
+  font-size: 1.25rem;
+  line-height: 1;
+  letter-spacing: 0.6em;
+  padding-left: 0.6em;
 }
 
-/* ==========================================================================
-   Flute-pitch rules — carries the pane across the whole page
-   ========================================================================== */
-
-.flute-rules {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    90deg,
-    rgb(211 222 217 / 0.05) 0px,
-    rgb(211 222 217 / 0.05) 1px,
-    transparent 1px,
-    transparent calc(var(--flute) * 4)
-  );
-}
-
-.hairline {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    var(--color-frost-faint) 0%,
-    rgb(70 86 79 / 0.25) 60%,
-    transparent 100%
-  );
+.rule {
   border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-ink) 22%, transparent);
+  margin: 0;
+}
+
+/* Chapter with a marginal column, like a well-set textbook. */
+.chapter {
+  display: grid;
+  gap: 2rem 3rem;
+}
+@media (min-width: 60rem) {
+  .chapter {
+    grid-template-columns: minmax(0, 1fr) 12.5rem;
+  }
+  .chapter-head {
+    grid-column: 1 / -1;
+  }
+  .chapter-margin {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .chapter-text {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
+.role + .role {
+  margin-top: 2.5rem;
+}
+
+.role-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.15rem 1.5rem;
+}
+.role-title {
+  font-size: clamp(1.4rem, 2.6vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+.role-meta {
+  font-size: 1rem;
+  color: var(--color-ink-soft);
+  font-style: italic;
+  font-variant-numeric: oldstyle-nums;
+}
+.role-blurb {
+  margin-top: 0.65rem;
+  max-width: 44ch;
+  font-size: 1.0625rem;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--color-ink-soft);
+}
+
+.entries {
+  margin-top: 1.4rem;
+  display: grid;
+  gap: 0.95rem;
+}
+.entries li {
+  padding-left: 1.1rem;
+  position: relative;
+  font-variant-numeric: oldstyle-nums;
+}
+/* A small rubric pilcrow-ish tick in the gutter of each entry. */
+.entries li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.78em;
+  width: 0.4rem;
+  height: 1px;
+  background: var(--color-rubric);
+}
+
+/* Marginalia — the numbers, set aside where a reader's eye would rest. */
+.margin-figs {
+  display: grid;
+  gap: 1.5rem;
+}
+.margin-figs > div {
+  padding-left: 1rem;
+  border-left: 1px solid var(--color-rubric);
+}
+.fig-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-rubric);
+  font-variant-numeric: lining-nums;
+}
+.fig-label {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--color-ink-soft);
+}
+.margin-note {
+  margin-top: 1.75rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.margin-note .sc {
+  display: block;
+  color: var(--color-ink-soft);
+  font-size: 0.95rem;
+}
+.margin-note a {
+  display: block;
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 59.99rem) {
+  .margin-figs {
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 1.25rem 1.5rem;
+  }
+}
+
+/* Contents & lists with dotted leaders. */
+.toc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+.toc-row .leader {
+  flex: 1;
+  min-width: 1rem;
+  border-bottom: 2px dotted var(--color-ink-faint);
+  transform: translateY(-0.25em);
+}
+.toc-row .num {
+  font-variant-numeric: oldstyle-nums;
+}
+a.toc-row:hover .toc-name {
+  color: var(--color-rubric);
+}
+.toc-numeral {
+  display: inline-block;
+  min-width: 2.6rem;
+  color: var(--color-rubric);
+}
+.toc-name {
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  line-height: 1.2;
+  transition: color 0.15s;
+}
+.toc-sub {
+  margin: 0.1rem 0 0 2.6rem;
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--color-ink-soft);
+  font-variant-numeric: oldstyle-nums;
+}
+
+.dropcap::first-letter {
+  float: left;
+  margin: 0.06em 0.09em -0.05em 0;
+  font-size: 4.6em;
+  font-weight: 400;
+  line-height: 0.78;
+  color: var(--color-rubric);
 }
 
 /* ==========================================================================
-   Motion — page-load sequence
+   Plates — the tipped-in image
    ========================================================================== */
 
-@keyframes wipe {
-  from {
-    --band-top: 44%;
-    --band-bot: 44%;
+.plate {
+  margin: 0;
+}
+.plate a {
+  display: block;
+  padding: 0.6rem;
+  background: #fbf7ec;
+  box-shadow:
+    0 0 0 1px rgb(60 40 10 / 0.22),
+    0 1px 2px rgb(50 30 10 / 0.25),
+    0 8px 14px -6px rgb(50 30 10 / 0.35);
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.plate a:hover {
+  transform: translateY(-3px);
+}
+.plate img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: top;
+}
+.plate figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--color-ink-soft);
+}
+
+/* ==========================================================================
+   Print — the résumé should still come out of a printer as a book.
+   ========================================================================== */
+
+@media print {
+  body {
+    background: #fff;
   }
-  to {
-    --band-top: var(--band-open-top);
-    --band-bot: var(--band-open-bot);
+  .desk {
+    display: block;
+    padding: 0;
   }
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(0.9rem);
+  .cover {
+    display: none;
   }
-  to {
-    opacity: 1;
-    transform: none;
+  .leaf {
+    width: auto;
+    box-shadow: none;
+    background: none;
+    break-after: page;
   }
-}
-
-@keyframes fade {
-  from {
-    opacity: 0;
+  .leaf-folio::before,
+  .leaf-folio::after {
+    color: #999;
   }
-  to {
-    opacity: 1;
-  }
-}
-
-.anim-wipe {
-  --band-top: var(--band-open-top);
-  --band-bot: var(--band-open-bot);
-  animation: wipe 1.5s var(--ease-glass) 0.35s both;
-}
-
-/* Label plate: the type below the window sits on this, so it never has to
-   compete with a metaball for contrast. */
-.hero-scrim {
-  position: absolute;
-  inset: calc(var(--band-open-bot) - 3%) 0 0 0;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgb(8 17 15 / 0) 0%,
-    rgb(8 17 15 / 0.58) 17%,
-    rgb(8 17 15 / 0.89) 41%,
-    rgb(8 17 15 / 0.975) 66%,
-    var(--color-ink) 100%
-  );
-}
-
-.anim-rise {
-  animation: rise 0.9s var(--ease-glass) both;
-}
-
-.anim-fade {
-  animation: fade 1.4s ease-out both;
-}
-
-/* Scroll-reveal, progressively enhanced by an IntersectionObserver. */
-.reveal {
-  opacity: 0;
-  transform: translateY(1.5rem);
-  transition:
-    opacity 0.8s var(--ease-glass),
-    transform 0.8s var(--ease-glass);
-}
-
-.reveal[data-shown='true'] {
-  opacity: 1;
-  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-delay: 0ms !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  .reveal {
-    opacity: 1;
-    transform: none;
-  }
-
-  .anim-wipe {
-    --band-top: var(--band-open-top);
-    --band-bot: var(--band-open-bot);
+  .plate a {
+    transition: none;
   }
 }

@@ -1,35 +1,26 @@
 import type { Metadata } from 'next';
-import { Bricolage_Grotesque, Instrument_Sans, IBM_Plex_Mono } from 'next/font/google';
-import { site } from '@/content/site';
+import { Newsreader } from 'next/font/google';
+import { person } from '@/content/book';
 import './globals.css';
+import './book.css';
 
-const bricolage = Bricolage_Grotesque({
+const newsreader = Newsreader({
   subsets: ['latin'],
-  variable: '--font-bricolage',
-  display: 'swap',
-});
-
-const instrument = Instrument_Sans({
-  subsets: ['latin'],
-  variable: '--font-instrument',
-  display: 'swap',
-});
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-plex-mono',
+  style: ['normal', 'italic'],
+  axes: ['opsz'],
+  variable: '--font-newsreader',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: `${site.name} — ${site.role}`,
-  description: site.intro,
+  title: `${person.name} — ${person.title}`,
+  description:
+    'A résumé set as a book: product management across agentic AI, consumer fintech and payments at scale.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${instrument.variable} ${plexMono.variable}`}>
+    <html lang="en" className={newsreader.variable}>
       <body>{children}</body>
     </html>
   );
