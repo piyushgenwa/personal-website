@@ -13,6 +13,8 @@ export interface Role {
   /** The italic line under the role on the résumé. */
   blurb?: string;
   bullets: string[];
+  /** Numbers pulled into the page foot. Only use ones that also appear in `bullets`. */
+  figures?: { value: string; label: string }[];
 }
 
 export interface Chapter {
@@ -23,7 +25,6 @@ export interface Chapter {
   /** One line for the contents page. */
   span: string;
   roles: Role[];
-  figures: { value: string; label: string }[];
   /** Plates (project slugs) this chapter points to. */
   plates?: string[];
 }
@@ -56,12 +57,12 @@ export const chapters: Chapter[] = [
           'Built a multi-agent pipeline that pulls live signals from 6 e-commerce/social data providers, clusters them into ranked product trends, and auto-publishes branded reports to a live URL, replacing a manual research workflow across 4+ market/category launches.',
           'Designed a self-updating, cross-linked knowledge base (98+ trend files) with a chat interface so non-technical teammates can query trend history in natural language.',
         ],
+        figures: [
+          { value: '>70%', label: 'less turnaround per request' },
+          { value: '50+', label: 'golden traces gating every change' },
+          { value: '98+', label: 'trend files in the knowledge base' },
+        ],
       },
-    ],
-    figures: [
-      { value: '>70%', label: 'less turnaround per request' },
-      { value: '50+', label: 'golden traces gating every change' },
-      { value: '98+', label: 'trend files in the knowledge base' },
     ],
     plates: ['trend-pulse', 'growth-secretary'],
   },
@@ -84,12 +85,12 @@ export const chapters: Chapter[] = [
           'Reduced W0 cancellations by 0.2% and mandate updates by 1.07% by introducing goal-based savings.',
           'Achieved a 0.2% uptick in setups and reduced cancellations by 0.3% by adding a contextual entry point for DS.',
         ],
+        figures: [
+          { value: '12×', label: 'localisation efficiency, with in-house AI' },
+          { value: '6 + 18', label: 'product managers and engineers led' },
+          { value: '5%', label: 'GMV uptick from the IPL roadmap' },
+        ],
       },
-    ],
-    figures: [
-      { value: '12×', label: 'localisation efficiency, with in-house AI' },
-      { value: '6 + 18', label: 'product managers and engineers led' },
-      { value: '5%', label: 'GMV uptick from the IPL roadmap' },
     ],
   },
   {
@@ -111,6 +112,11 @@ export const chapters: Chapter[] = [
           'Enhanced app performance by 57% by reducing load times on the most-visited pages (~150K daily visits).',
           'Increased content consumption from the Educator profile by 18% through improved information architecture and content ordering.',
         ],
+        figures: [
+          { value: '12%', label: 'lift in organic conversion' },
+          { value: '~₹20M', label: 'saved a year by making UPI primary' },
+          { value: '57%', label: 'faster on ~150K daily visits' },
+        ],
       },
       {
         title: 'Associate Product Manager',
@@ -124,12 +130,12 @@ export const chapters: Chapter[] = [
           'Improved learner referral conversion by 18% by recommending coupon codes to users in the checkout flow.',
           'Hiked revenue contribution of loans by 67% and reduced approval time by 90% by integrating Bajaj Finserv.',
         ],
+        figures: [
+          { value: '₹320M', label: 'Unacademy Store revenue, from zero' },
+          { value: '120%', label: 'conversion lift, Daily Scholarship Test' },
+          { value: '67%', label: 'more revenue from loans' },
+        ],
       },
-    ],
-    figures: [
-      { value: '₹0 → ₹320M', label: 'revenue from Unacademy Store' },
-      { value: '120%', label: 'conversion lift, Daily Scholarship Test' },
-      { value: '57%', label: 'faster on ~150K daily visits' },
     ],
   },
   {
@@ -148,11 +154,12 @@ export const chapters: Chapter[] = [
           'Revamped the Virtual Stock Market competition in association with BSE, with 10k+ participants.',
           'Ideated and executed ACT, E-Cell’s social initiative that prevented 100 kg+ of CO₂ emissions.',
         ],
+        figures: [
+          { value: '10k+', label: 'participants, Virtual Stock Market' },
+          { value: '100 kg+', label: 'of CO₂ emissions prevented by ACT' },
+          { value: '60+', label: 'participants at the first Entre-MUN' },
+        ],
       },
-    ],
-    figures: [
-      { value: '10k+', label: 'participants, Virtual Stock Market' },
-      { value: '100 kg+', label: 'of CO₂ emissions prevented by ACT' },
     ],
   },
 ];

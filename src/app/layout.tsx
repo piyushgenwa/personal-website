@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Newsreader } from 'next/font/google';
 import { person } from '@/content/book';
 import './globals.css';
+import './book.css';
 
 const newsreader = Newsreader({
   subsets: ['latin'],
