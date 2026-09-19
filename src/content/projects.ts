@@ -17,6 +17,8 @@ export interface ProjectBlock {
 
 export interface Project {
   slug: string;
+  /** Placeholder copy from the original scaffold. Kept in the data, never rendered. */
+  draft?: boolean;
   title: string;
   /** One line, lowercase, no period — sits under the title on the card. */
   tagline: string;
@@ -38,7 +40,7 @@ export interface Project {
   screenshots?: { src: string; alt: string }[];
 }
 
-export const projects: Project[] = [
+const all: Project[] = [
   {
     slug: 'trend-pulse',
     title: 'Trend Pulse',
@@ -122,6 +124,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'ledger',
+    draft: true,
     title: 'Ledger',
     tagline: 'quote reconciliation for buyers who live in spreadsheets',
     year: '2025',
@@ -198,6 +201,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'spec-diff',
+    draft: true,
     title: 'Spec Diff',
     tagline: 'catches the revision nobody mentioned',
     year: '2025',
@@ -230,6 +234,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'freight',
+    draft: true,
     title: 'Freight Napkin',
     tagline: 'landed cost while the buyer is still on the call',
     year: '2024',
@@ -258,6 +263,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'atlas',
+    draft: true,
     title: 'Supplier Atlas',
     tagline: 'one supplier record instead of nine',
     year: '2024',
@@ -295,6 +301,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'quota',
+    draft: true,
     title: 'Quota',
     tagline: 'a scheduler that explains its own decisions',
     year: '2023',
@@ -328,6 +335,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'moodboard',
+    draft: true,
     title: 'Swatch',
     tagline: 'colour matching that accounts for the screen',
     year: '2023',
@@ -355,6 +363,8 @@ export const projects: Project[] = [
     ],
   },
 ];
+
+export const projects: Project[] = all.filter((p) => !p.draft);
 
 export function getProject(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug);
