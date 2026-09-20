@@ -12,6 +12,7 @@ export type Scene = 'sky' | 'meadow' | 'ocean' | 'dusk' | 'lagoon' | 'orchard' |
 /** Real photographs, by frame id. Frames without one get a painted scene. */
 const PHOTOS: Record<string, string> = {
   sourcy: '/photos/sourcy.jpg', // Supertree Grove, Singapore
+  flores: '/projects/flores-tile.jpg', // the bouquet, cropped out of the page
 };
 
 const SCENES: Scene[] = ['sky', 'meadow', 'ocean', 'dusk', 'lagoon', 'orchard', 'glacier', 'bloom'];

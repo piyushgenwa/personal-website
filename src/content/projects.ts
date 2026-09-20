@@ -88,6 +88,61 @@ const all: Project[] = [
     ],
   },
   {
+    slug: 'flores',
+    title: 'Flores',
+    tagline: 'a tiny quiz for two people, ending in one bouquet',
+    year: '2026',
+    role: 'Design and build',
+    status: 'Shipped',
+    stack: ['Next.js', 'React', 'Vercel'],
+    thumb: '/projects/flores-tile.jpg',
+    accent: 'flare',
+    summary:
+      'Eleven either-or questions decide which flower you are — botanical name, four trait tags and a line of handwriting on a pressed-specimen card. Then you send the card to one person, they answer the same eleven, and the two flowers are tied into a single bouquet addressed to both of you.',
+    metrics: [
+      { value: '11', label: 'either-or questions' },
+      { value: '2', label: 'people to a vase' },
+      { value: '0', label: 'accounts or sign-ups' },
+    ],
+    blocks: [
+      {
+        heading: 'The idea',
+        body: [
+          'Personality quizzes end where they are least interesting: at your own result. Flores treats the result as half of something — a flower is a nice thing to be told you are, but it only becomes a gift once it is beside someone else’s.',
+          'So the quiz is built to be handed on. The result card has one button on it, and that button is addressed to a specific person by name.',
+        ],
+      },
+      {
+        heading: 'How it works',
+        body: [
+          'Eleven forced-choice questions, two options each, no scoring shown while you answer — "there are no wrong answers, only slightly suspiciously specific ones". The result is a pressed-flower card: the common name, the Latin binomial, four trait chips, and a handwritten line that reads like a field note rather than a horoscope.',
+          'Every screen is a URL, so the whole thing runs without accounts or a database. Your flower lives at /f/<flower>, the invitation you send at /with/<flower>, and the finished pair at /b/<flower>-<flower>, with both first names carried in the query string. Names are optional — there is a skip on every step that asks for one.',
+          'When the second person finishes, the two illustrations are composed into one vase, tied with a ribbon, and captioned with a line that reads both flowers against each other. The image can be downloaded or passed on.',
+        ],
+      },
+      {
+        heading: 'What it gets right',
+        body: [
+          'The restraint. It is warm without being cute: a single muted palette, one display serif, a mono voice for the labels, and paper textures that stay in the background. Nothing on screen asks for an email address.',
+          'The copy carries the whole product. Every question is a small scene rather than a trait ("the room is filling up. you…"), and the pairing text is written to flatter both people at once instead of scoring their compatibility.',
+        ],
+      },
+      {
+        heading: 'Rough edges',
+        body: [
+          'The flower illustrations are fetched after the card renders and can take fifteen to twenty seconds, so the specimen area sits empty on a slow connection — long enough to read as broken rather than loading. A shared /f/ link shows the same blank frame to whoever opens it.',
+        ],
+      },
+    ],
+    links: [{ label: 'Live', href: 'https://duo-bouquet.vercel.app/' }],
+    screenshots: [
+      { src: '/projects/flores-landing.jpg', alt: 'Flores landing page — "Which flower are you?"' },
+      { src: '/projects/flores-quiz.jpg', alt: 'One of the eleven either-or questions' },
+      { src: '/projects/flores-flower.jpg', alt: 'A result card: Red Rose, Rosa gallica, with trait chips' },
+      { src: '/projects/flores-bouquet.jpg', alt: 'Two flowers tied into one bouquet for both people' },
+    ],
+  },
+  {
     slug: 'sprite-mart',
     title: 'Sprite Mart',
     tagline: 'a character stays the character across every pose',
