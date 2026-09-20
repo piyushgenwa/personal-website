@@ -39,7 +39,9 @@ removes the bubbles' drift and the slides.
   button (`onClick`) or a link (`href`), so the same body drives the interactive
   home page and the plain case-study pages.
 - `src/components/Camera.tsx` — the state machine. `lcd.tsx` — what's drawn on the LCD.
-- `src/components/Backdrop.tsx` — sky, hill, bubbles. `src/app/globals.css` — everything else.
+- `src/components/Backdrop.tsx` — sky, hill, bubbles.
+- `src/app/camera.css` — the body as a physical object. `globals.css` — tokens, wallpaper,
+  and everything drawn *on* the LCD.
 
 ## Design
 
@@ -51,6 +53,22 @@ Share Tech Mono; UI text is Open Sans (a free stand-in for Frutiger). The
 
 Glass = a bright top half over a deeper bottom half, a hard white edge, and
 `backdrop-filter`. Landscapes on the LCD are layered CSS gradients.
+
+The body is meant to read as a real object, so two rules hold throughout
+`camera.css`:
+
+1. **The metal is lit by the scene it sits in.** Sky above, grass below — so every
+   horizontal surface runs cool white along its top edge and picks up a warm green
+   bounce along its bottom one. A `--curve` overlay darkens both sides so the body
+   reads as a slab that turns away from you, not a flat card.
+2. **Nothing is flat.** Every part is either raised (`--raised`: bright top edge,
+   dark underside, cast shadow) or recessed (`--sunken`: dark top edge, bright
+   bottom edge). Buttons actually travel on `:active`.
+
+The top plate is a real surface — `rotateX(64deg)` on `.deck`, with the shutter and
+power button on it. Anything printed there is pre-stretched by `--deck-squash`
+(1/cos 64° ≈ 2.28) so it prints true once foreshortened. Parts with no function —
+screws, strap lug, microphone, speaker — are `<span aria-hidden>` and never focusable.
 
 > **Toolchain note:** `typescript` is pinned to `5.x` on purpose — `typescript@7`
 > has a different package layout that Next 16 can't resolve yet.

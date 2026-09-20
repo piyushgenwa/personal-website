@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Open_Sans, Share_Tech_Mono } from 'next/font/google';
 import { person } from '@/content/book';
 import './globals.css';
+import './camera.css';
 
 // Open Sans is the closest free cousin of Frutiger, the face of every Aero UI.
 const openSans = Open_Sans({

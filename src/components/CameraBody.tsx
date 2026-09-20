@@ -4,10 +4,15 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 /**
- * The camera itself: silver shell, LCD bezel and the rear controls. It knows
- * nothing about the site — the LCD is `children`, and every control is either
- * a button (`onClick`) or a link (`href`), so the same body drives the
- * interactive home page and the plain case-study pages.
+ * The camera itself: a body with a top deck, a recessed back panel, a sunken
+ * LCD and moulded controls. It knows nothing about the site — the LCD is
+ * `children`, and every control is either a button (`onClick`) or a link
+ * (`href`), so the same body drives the interactive home page and the plain
+ * case-study pages.
+ *
+ * Anything with no function is a `<span aria-hidden>`: screws, the strap lug,
+ * the microphone, the speaker. They are there to make the object read as a
+ * real one, and they are never focusable.
  */
 
 export interface Ctl {
@@ -74,75 +79,91 @@ export function CameraBody({
 }) {
   return (
     <div className="cam">
-      {/* Raised bits on the top plate. */}
-      <div className="cam-top" aria-hidden={false}>
-        <span className="power-led" aria-hidden />
-        <span className="mode-dial" aria-hidden>
-          <i />
-          <i />
-          <i />
+      {/* The top plate, laid back in perspective. The shutter lives here, as it does
+          on the real thing — the ● on the back does the same job face-on. */}
+      <div className="deck">
+        <span className="deck-brand" aria-hidden>
+          genwa·shot
         </span>
+        <span className="mic" aria-hidden />
+        <span className="power" aria-hidden />
         <Key ctl={controls.shutter} label="Shutter" className="shutter" />
       </div>
 
-      <div className="cam-face">
-        <div className="lcd-bezel">
-          <div className="lcd" role="region" aria-label={lcdLabel}>
-            {children}
-            <div className="lcd-glare" aria-hidden />
-            <div className="flash" data-on={flash || undefined} aria-hidden />
-          </div>
-        </div>
+      {/* A sliver of the top chamfer, where the deck folds into the back. */}
+      <span className="chamfer" aria-hidden />
+      <span className="lug" aria-hidden />
 
-        <div className="panel">
-          <div className="panel-top">
-            <div className="brand" aria-hidden>
-              <span className="brand-name">genwa·shot</span>
-              <span className="brand-spec">12.1 MEGA PIXELS</span>
+      <div className="shell">
+        <div className="cam-face">
+          <div className="lcd-well">
+            <div className="lcd-bezel">
+              <div className="lcd" role="region" aria-label={lcdLabel}>
+                {children}
+                <div className="lcd-glare" aria-hidden />
+                <div className="flash" data-on={flash || undefined} aria-hidden />
+              </div>
             </div>
-            <div className="grill" aria-hidden />
           </div>
 
-          <div className="zoom" role="group" aria-label="Zoom">
-            <Key ctl={controls.wide} label="Wide — back to the index" className="zoom-btn">
-              W
-            </Key>
-            <span className="zoom-mid" aria-hidden />
-            <Key ctl={controls.tele} label="Tele — open the picture" className="zoom-btn">
-              T
-            </Key>
-          </div>
+          <div className="panel">
+            <div className="panel-top">
+              <div className="silk" aria-hidden>
+                <span>12.1 MEGA PIXELS</span>
+                <span>OPTICAL STEADYSHOT</span>
+              </div>
+              <div className="thumb" aria-hidden>
+                <span className="led" />
+              </div>
+            </div>
 
-          <div className="dpad" role="group" aria-label="Control wheel">
-            <Key ctl={controls.up} label="Up" className="dkey dkey-up">
-              <b aria-hidden>▲</b>
-            </Key>
-            <Key ctl={controls.right} label="Right — next picture" className="dkey dkey-right">
-              <b aria-hidden>▶</b>
-            </Key>
-            <Key ctl={controls.down} label="Down" className="dkey dkey-down">
-              <b aria-hidden>▼</b>
-            </Key>
-            <Key ctl={controls.left} label="Left — previous picture" className="dkey dkey-left">
-              <b aria-hidden>◀</b>
-            </Key>
-            <Key ctl={controls.center} label="Select" className="dcenter">
-              <span aria-hidden>●</span>
-            </Key>
-          </div>
+            <div className="zoom" role="group" aria-label="Zoom">
+              <Key ctl={controls.wide} label="Wide — back to the index" className="zoom-btn zoom-w">
+                W
+              </Key>
+              <span className="zoom-pivot" aria-hidden />
+              <Key ctl={controls.tele} label="Tele — open the picture" className="zoom-btn zoom-t">
+                T
+              </Key>
+            </div>
 
-          <div className="pills">
-            <Key ctl={controls.menu} label="Menu" className="pill">
-              MENU
-            </Key>
-            <Key ctl={controls.play} label="Playback — photo index" className="pill">
-              ▶
-            </Key>
-            <Key ctl={controls.disp} label="Display — show or hide the on-screen info" className="pill">
-              DISP
-            </Key>
+            <div className="dpad" role="group" aria-label="Control wheel">
+              <span className="dpad-ring" aria-hidden />
+              <Key ctl={controls.up} label="Up" className="dkey dkey-up">
+                <b aria-hidden>▲</b>
+              </Key>
+              <Key ctl={controls.right} label="Right — next picture" className="dkey dkey-right">
+                <b aria-hidden>▶</b>
+              </Key>
+              <Key ctl={controls.down} label="Down" className="dkey dkey-down">
+                <b aria-hidden>▼</b>
+              </Key>
+              <Key ctl={controls.left} label="Left — previous picture" className="dkey dkey-left">
+                <b aria-hidden>◀</b>
+              </Key>
+              <Key ctl={controls.center} label="Select" className="dcenter">
+                <span aria-hidden>●</span>
+              </Key>
+            </div>
+
+            <div className="pills">
+              <Key ctl={controls.menu} label="Menu" className="pill">
+                MENU
+              </Key>
+              <Key ctl={controls.play} label="Playback — photo index" className="pill">
+                ▶
+              </Key>
+              <Key ctl={controls.disp} label="Display — show or hide the on-screen info" className="pill">
+                DISP
+              </Key>
+            </div>
+
+            <span className="speaker" aria-hidden />
           </div>
         </div>
+
+        <span className="screw screw-l" aria-hidden />
+        <span className="screw screw-r" aria-hidden />
       </div>
     </div>
   );
