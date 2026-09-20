@@ -190,6 +190,18 @@
   margin-right: 1.2rem;
 }
 
+/* Contents and lists shrink with the window's height, like the rest of the type. */
+.leaf--bound .toc-name {
+  font-size: clamp(1.1rem, min(2.6vw, 3.3svh), 1.75rem);
+}
+.leaf--bound .toc-sub {
+  font-size: clamp(0.82rem, 1.7svh, 1rem);
+  margin-top: 0;
+}
+.leaf--bound .folio-title {
+  font-size: clamp(1.5rem, min(3.4vw, 4.6svh), 2.5rem);
+}
+
 .title-page {
   height: 100%;
   min-height: 24rem;
