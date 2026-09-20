@@ -1,7 +1,7 @@
-# Personal website — the book
+# Personal website — genwa·shot
 
-A résumé set as a book. Next.js 16 (App Router), React 19, Tailwind v4. No client
-JS beyond the page-turning book, no shaders, no images beyond the case-study screenshots.
+A résumé shot on a 2000s compact camera, in Frutiger Aero. Next.js 16 (App Router),
+React 19, Tailwind v4 (reset only). Everything visual is CSS — no images, no WebGL.
 
 ```bash
 npm run dev        # http://localhost:3000
@@ -9,44 +9,48 @@ npm run build      # statically prerenders every page
 npm run typecheck
 ```
 
+## The camera
+
+The home page is a working camera with three screens, like the real thing:
+
+| Screen   | What it is                                          | Controls |
+| -------- | --------------------------------------------------- | -------- |
+| **shoot**  | Viewfinder — your name as the subject, AF brackets that lock green | Shutter / `●` takes the picture → index. `T`/`W` zoom the view |
+| **index**  | The photo roll, 3×3 thumbnails                      | Arrows move, `●` / `T` opens |
+| **photo**  | One role / project / the contact card, with the orange date stamp | `◀ ▶` next picture, `▲ ▼` scroll, `W` back to index |
+
+Shutter from anywhere but the viewfinder returns to it (a real camera's half-press
+does the same). **MENU** opens the list (photo roll, résumé PDF, email, LinkedIn);
+**DISP** hides the on-screen info. Keyboard mirrors the hardware: arrows, `Enter` = ●,
+`Space` = shutter, `M`, `D`, `W`, `T`, `P`, `Esc`. Swipe works on touch.
+`/#roll` and `/#<id>` (e.g. `/#jar`) deep-link to a screen. `prefers-reduced-motion`
+removes the bubbles' drift and the slides.
+
 ## Structure
 
-The home page is a book you turn: **cover → title (i) → contents (ii) → one page
-per role (1–5) → plates (6) → colophon (7)**. It follows the résumé's order, latest first.
-
-- `src/components/Book.tsx` — the engine. Faces are paired into sheets (front on
-  the right, back on the left once turned); a turn is a 3D rotation about the
-  spine. Wide screens show a spread, narrow ones one page at a time using the same
-  code. Turn with the corner curls, ← / →, PageUp/PageDown, a swipe, or the bar
-  below. `/#jar` deep-links to a page (opens there without animating).
-  `prefers-reduced-motion` makes turns instant.
-- `src/components/faces.tsx` — every face, in reading order. **The order alone decides
-  who shares a spread**, so insert a page and the pairing follows.
-- `src/app/book.css` — sheets, spreads and turning. `globals.css` — paper and type.
-- A page too long for its face scrolls inside itself and fades at the foot.
-
-- `src/content/book.ts` — the résumé itself. Every fact and number on the site
-  lives here; edit it when the résumé changes. `figures` are the numbers pulled
-  into the margin, and must also appear in that entry's bullets.
-- `src/content/projects.ts` — the *plates*: case studies at `/work/<slug>`.
-  Entries marked `draft: true` are placeholder copy from the original scaffold
-  and are never rendered.
-- `src/components/Leaf.tsx` — one page (running head, folio, gutter side).
-  Odd folios are recto, even are verso; the head alternates like a printed book.
-- `public/Piyush_Resume_26.pdf` — linked from the colophon as "the short edition".
+- `src/content/book.ts` — the résumé itself (roles, bullets, figures, contact).
+  Edit this when the résumé changes. `figures` must also appear in that role's bullets.
+- `src/content/projects.ts` — case studies at `/work/<slug>`. Entries marked
+  `draft: true` are placeholder copy from the original scaffold and never render.
+- `src/content/roll.ts` — the photo roll: roles + projects + the contact card,
+  in shooting order, each assigned a landscape "scene" and an orange date stamp.
+  Add a role or project and the roll follows.
+- `src/components/CameraBody.tsx` — shell, LCD bezel and controls. Each control is a
+  button (`onClick`) or a link (`href`), so the same body drives the interactive
+  home page and the plain case-study pages.
+- `src/components/Camera.tsx` — the state machine. `lcd.tsx` — what's drawn on the LCD.
+- `src/components/Backdrop.tsx` — sky, hill, bubbles. `src/app/globals.css` — everything else.
 
 ## Design
 
-One typeface (**Newsreader**, with its optical-size axis), one accent (rubric red
-— the colour printers used for headings), warm paper on a darker desk. Tokens are
-in `src/app/globals.css`.
+Frutiger Aero: bright sky and green hill, glossy aqua glass, glass-bead bullets,
+bubbles. The camera is brushed silver with a blue-gel `●` button. The LCD is dark
+glass with a reflection and faint scanlines. HUD numerals and the date stamp use
+Share Tech Mono; UI text is Open Sans (a free stand-in for Frutiger). The
+"genwa·shot" name is deliberately not a real camera brand.
 
-- Paper is an inline SVG noise texture plus a gutter shadow that flips per page,
-  and a stacked box-shadow for the fore-edge.
-- The first word of each entry is set in small caps so a page scans like a résumé.
-- Numbers go in the margin column (below the text on narrow screens).
-- Screenshots are "tipped-in plates": mounted on a card, captioned `1.a`, `1.b`.
-- `@media print` drops the cover and desk and puts one leaf per printed page.
+Glass = a bright top half over a deeper bottom half, a hard white edge, and
+`backdrop-filter`. Landscapes on the LCD are layered CSS gradients.
 
 > **Toolchain note:** `typescript` is pinned to `5.x` on purpose — `typescript@7`
 > has a different package layout that Next 16 can't resolve yet.
