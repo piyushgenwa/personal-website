@@ -575,6 +575,12 @@ a {
     linear-gradient(180deg, #ff8fc8 0%, #ffc8e6 52%, #fff0f8 100%);
 }
 
+.has-photo {
+  background-size: cover;
+  background-position: center 40%;
+  background-repeat: no-repeat;
+}
+
 /* HUD */
 .hud {
   position: absolute;

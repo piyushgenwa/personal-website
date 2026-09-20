@@ -9,6 +9,11 @@ import { projects, type Project } from './projects';
 
 export type Scene = 'sky' | 'meadow' | 'ocean' | 'dusk' | 'lagoon' | 'orchard' | 'glacier' | 'bloom';
 
+/** Real photographs, by frame id. Frames without one get a painted scene. */
+const PHOTOS: Record<string, string> = {
+  sourcy: '/photos/sourcy.jpg', // Supertree Grove, Singapore
+};
+
 const SCENES: Scene[] = ['sky', 'meadow', 'ocean', 'dusk', 'lagoon', 'orchard', 'glacier', 'bloom'];
 
 interface Base {
@@ -16,6 +21,8 @@ interface Base {
   scene: Scene;
   /** The orange date imprint burned into the corner, as a 2000s camera would. */
   stamp: string;
+  /** A real photograph to use instead of the painted `scene`. Path under /public. */
+  photo?: string;
   label: string;
   sub: string;
 }
@@ -60,6 +67,6 @@ export const roll: Frame[] = [
     project: p,
   })),
   { id: 'contact', kind: 'contact', scene: 'sky', stamp: '’26', label: 'Say hello', sub: 'Contact' } as Frame,
-].map((f, i): Frame => ({ ...f, scene: SCENES[i % SCENES.length] }));
+].map((f, i): Frame => ({ ...f, scene: SCENES[i % SCENES.length], photo: PHOTOS[f.id] }));
 
 export const frameIndex = (id: string) => roll.findIndex((f) => f.id === id);

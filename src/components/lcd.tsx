@@ -98,7 +98,8 @@ export function IndexScreen({
           <button
             key={f.id}
             type="button"
-            className={`tile scene-${f.scene}`}
+            className={`tile scene-${f.scene}${f.photo ? ' has-photo' : ''}`}
+            style={f.photo ? { backgroundImage: `url(${f.photo})` } : undefined}
             data-sel={i === sel || undefined}
             aria-current={i === sel || undefined}
             onClick={() => onPick(i)}
@@ -267,7 +268,11 @@ export function PhotoScreen({
 }) {
   return (
     <div className="scr" key={frame.id} data-dir={dir}>
-      <div className={`scene scene-${frame.scene}`} aria-hidden />
+      <div
+        className={`scene scene-${frame.scene}${frame.photo ? ' has-photo' : ''}`}
+        style={frame.photo ? { backgroundImage: `url(${frame.photo})` } : undefined}
+        aria-hidden
+      />
       <div className="photo-scroll" ref={scrollRef} tabIndex={0}>
         <article className={`photo-card glass${frame.kind === 'contact' ? '' : ' photo-card--split'}`}>
           <FrameBody frame={frame} onJump={onJump} />
