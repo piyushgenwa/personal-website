@@ -127,12 +127,6 @@ const all: Project[] = [
           'The copy carries the whole product. Every question is a small scene rather than a trait ("the room is filling up. you…"), and the pairing text is written to flatter both people at once instead of scoring their compatibility.',
         ],
       },
-      {
-        heading: 'Rough edges',
-        body: [
-          'The flower illustrations are fetched after the card renders and can take fifteen to twenty seconds, so the specimen area sits empty on a slow connection — long enough to read as broken rather than loading. A shared /f/ link shows the same blank frame to whoever opens it.',
-        ],
-      },
     ],
     links: [{ label: 'Live', href: 'https://duo-bouquet.vercel.app/' }],
     screenshots: [
