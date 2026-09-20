@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode, type RefObject } from 'react';
 
 /**
  * The camera itself: a body with a top deck, a recessed back panel, a sunken
@@ -66,6 +66,63 @@ function Key({
   );
 }
 
+/**
+ * Turns the body a few degrees toward the pointer, so the light on it moves as
+ * you look at it. Writes four custom properties and nothing else: two angles
+ * for the body, and the raw -1..1 position, which the glass reflection and the
+ * back-panel specular translate against (see `camera.css`, §8).
+ *
+ * Only transforms are animated, and only on a real pointer. Touch and
+ * `prefers-reduced-motion` never start it, so the properties stay at zero.
+ */
+function useTilt(ref: RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const MAX = 5; // degrees
+    let tx = 0;
+    let ty = 0;
+    let cx = 0;
+    let cy = 0;
+    let raf = 0;
+
+    const tick = () => {
+      cx += (tx - cx) * 0.09;
+      cy += (ty - cy) * 0.09;
+      el.style.setProperty('--tilt-y', `${(cx * MAX).toFixed(2)}deg`);
+      el.style.setProperty('--tilt-x', `${(-cy * MAX).toFixed(2)}deg`);
+      el.style.setProperty('--tilt-px', cx.toFixed(3));
+      el.style.setProperty('--tilt-py', cy.toFixed(3));
+      raf = Math.abs(tx - cx) + Math.abs(ty - cy) > 0.002 ? requestAnimationFrame(tick) : 0;
+    };
+    const wake = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      tx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
+      ty = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1));
+      wake();
+    };
+    const onLeave = () => {
+      tx = 0;
+      ty = 0;
+      wake();
+    };
+
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerleave', onLeave);
+    return () => {
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerleave', onLeave);
+      cancelAnimationFrame(raf);
+    };
+  }, [ref]);
+}
+
 export function CameraBody({
   children,
   controls,
@@ -77,8 +134,11 @@ export function CameraBody({
   flash?: boolean;
   lcdLabel?: string;
 }) {
+  const body = useRef<HTMLDivElement>(null);
+  useTilt(body);
+
   return (
-    <div className="cam">
+    <div className="cam" ref={body}>
       {/* The top plate, laid back in perspective. The shutter lives here, as it does
           on the real thing — the ● on the back does the same job face-on. */}
       <div className="deck">

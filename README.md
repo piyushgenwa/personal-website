@@ -54,21 +54,35 @@ Share Tech Mono; UI text is Open Sans (a free stand-in for Frutiger). The
 Glass = a bright top half over a deeper bottom half, a hard white edge, and
 `backdrop-filter`. Landscapes on the LCD are layered CSS gradients.
 
-The body is meant to read as a real object, so two rules hold throughout
-`camera.css`:
+The body is meant to read as a real object, so three rules hold throughout
+`camera.css` (§1 defines every value as a token — tune there, not below):
 
-1. **The metal is lit by the scene it sits in.** Sky above, grass below — so every
+1. **One light**, from the top left (`--light: 135deg`). Every raised surface gets a
+   bright top/left edge, a dark bottom/right under-edge and an outer shadow
+   (`--raised`); every recess gets the inverse (`--sunken`). Inconsistent lighting is
+   the main thing that makes a render read as a sticker.
+2. **The metal is lit by the scene it sits in.** Sky above, grass below — so every
    horizontal surface runs cool white along its top edge and picks up a warm green
-   bounce along its bottom one. A `--curve` overlay darkens both sides so the body
-   reads as a slab that turns away from you, not a flat card.
-2. **Nothing is flat.** Every part is either raised (`--raised`: bright top edge,
-   dark underside, cast shadow) or recessed (`--sunken`: dark top edge, bright
-   bottom edge). Buttons actually travel on `:active`.
+   bounce along its bottom one. `--curve` darkens both sides so the body reads as a
+   slab that turns away from you, not a flat card.
+3. **Nothing is pasted on.** Every part has an edge, a shadow or a recess tying it to
+   the surface beneath it. Buttons actually travel on `:active`.
+
+Brushed aluminium is `--grain-metal`: an inline SVG `feTurbulence` at a high frequency
+across x and almost none down y, desaturated, compressed toward mid grey and composited
+with `background-blend-mode: overlay`. It is static, so it rasterises once.
 
 The top plate is a real surface — `rotateX(64deg)` on `.deck`, with the shutter and
-power button on it. Anything printed there is pre-stretched by `--deck-squash`
-(1/cos 64° ≈ 2.28) so it prints true once foreshortened. Parts with no function —
-screws, strap lug, microphone, speaker — are `<span aria-hidden>` and never focusable.
+power button standing on it as cylinders (a cap plus a wall of stacked hard shadows).
+Anything printed there is pre-stretched by `--deck-squash` (1/cos 64° ≈ 2.28) so it
+prints true once foreshortened. Parts with no function — screws, strap lug, microphone,
+speaker — are `<span aria-hidden>` and never focusable.
+
+**Pointer tilt** (`useTilt` in `CameraBody.tsx`) turns the body up to 5° toward the
+cursor, smoothed with a lerp on rAF. It writes four custom properties and nothing else;
+the glass reflection and the back-panel specular translate against them so the light
+moves with the tilt. Only transforms animate. Touch pointers and
+`prefers-reduced-motion` never start it, so the properties stay at zero.
 
 > **Toolchain note:** `typescript` is pinned to `5.x` on purpose — `typescript@7`
 > has a different package layout that Next 16 can't resolve yet.
