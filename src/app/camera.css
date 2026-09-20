@@ -138,17 +138,32 @@
   filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.6));
 }
 
+/* A button standing on the plate is a cylinder: a cap, and a wall down to the
+   base. The plate is laid back, so its own vertical axis is squashed to
+   cos(64°) ≈ 0.44 — a wall that should read as `h` tall on screen has to be
+   drawn about 2.05 × h down the plate. That is what the stacked hard shadows
+   below are: successive slices of the wall, darkening as they turn away from
+   the light, then one soft shadow cast onto the plate itself. */
 .power {
   position: absolute;
   right: 26%;
-  top: 34%;
-  width: 1.5rem;
-  height: 1.5rem;
+  top: 30%;
+  width: 1.45rem;
+  height: 1.45rem;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 35%, #fbfdfe 0 20%, #cdd6de 55%, #98a3ad 100%);
+  background: radial-gradient(circle at 50% 30%, #ffffff 0 24%, #e9eff4 52%, #c4ced7 82%, #aab5bf 100%);
   box-shadow:
-    inset 0 0 0 1px rgb(68 82 96 / 0.55),
-    0 0.2rem 0.25rem rgb(10 24 38 / 0.4);
+    inset 0 0 0 1px rgb(58 72 86 / 0.65),
+    0 0.100rem 0 #a9b4be,
+    0 0.200rem 0 #9fa9b3,
+    0 0.300rem 0 #949fa9,
+    0 0.400rem 0 #8a949f,
+    0 0.500rem 0 #7f8a94,
+    0 0.600rem 0 #757f8a,
+    0 0.700rem 0 #6a7580,
+    0 0.800rem 0 #606a75,
+    0 0.900rem 0 #55606b,
+    0 0.96rem 0.4rem rgb(8 20 34 / 0.55);
 }
 
 .shutter {
@@ -162,22 +177,42 @@
   border-radius: 50%;
   cursor: pointer;
   /* A dome: the catch light sits above centre, the underside goes dark. */
-  background: radial-gradient(circle at 50% 32%, #ffffff 0 16%, #e8eef3 40%, #bcc6cf 70%, #8b959f 100%);
+  background: radial-gradient(circle at 50% 28%, #ffffff 0 22%, #eef4f8 48%, #ccd6de 76%, #b2bdc7 100%);
+  /* the wall of the cylinder, then its shadow on the plate */
   box-shadow:
-    inset 0 0 0 1px rgb(68 82 96 / 0.6),
-    inset 0 -0.2rem 0.3rem rgb(10 24 38 / 0.3),
-    0 0.28rem 0.3rem rgb(10 24 38 / 0.45);
-  transition: transform 0.07s ease-out, box-shadow 0.07s ease-out;
+    inset 0 0 0 1px rgb(58 72 86 / 0.65),
+    inset 0 -0.22rem 0.32rem rgb(10 24 38 / 0.22),
+    0 0.115rem 0 #b7c1ca,
+    0 0.231rem 0 #aeb8c2,
+    0 0.346rem 0 #a6b0b9,
+    0 0.462rem 0 #9da7b1,
+    0 0.577rem 0 #949ea8,
+    0 0.692rem 0 #8b959f,
+    0 0.808rem 0 #838d97,
+    0 0.923rem 0 #7a848e,
+    0 1.038rem 0 #717b85,
+    0 1.154rem 0 #68727d,
+    0 1.269rem 0 #606a74,
+    0 1.385rem 0 #57616c,
+    0 1.500rem 0 #4e5863,
+    0 1.58rem 0.55rem rgb(8 20 34 / 0.6);
+  transition: box-shadow 0.08s ease-out, background 0.12s ease-out;
 }
 .shutter:hover {
-  background: radial-gradient(circle at 50% 32%, #ffffff 0 16%, #edf7fd 40%, #b6d8ea 70%, #85a8bd 100%);
+  background: radial-gradient(circle at 50% 30%, #ffffff 0 15%, #eaf7fe 38%, #b9dcef 68%, #8fb4c9 100%);
 }
+/* Pressed: the wall shortens, so the button sinks toward the plate. */
 .shutter:active {
-  transform: translateY(0.12rem);
   box-shadow:
-    inset 0 0 0 1px rgb(68 82 96 / 0.6),
-    inset 0 -0.1rem 0.2rem rgb(10 24 38 / 0.3),
-    0 0.1rem 0.15rem rgb(10 24 38 / 0.45);
+    inset 0 0 0 1px rgb(58 72 86 / 0.65),
+    inset 0 -0.12rem 0.22rem rgb(10 24 38 / 0.3),
+    0 0.100rem 0 #a7b1bb,
+    0 0.200rem 0 #9aa4ae,
+    0 0.300rem 0 #8d97a2,
+    0 0.400rem 0 #808a95,
+    0 0.500rem 0 #737d88,
+    0 0.600rem 0 #66707b,
+    0 0.66rem 0.32rem rgb(8 20 34 / 0.55);
 }
 
 /* The fold between the top plate and the back. */
@@ -532,7 +567,10 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  translate: -50% -50%;
+  /* Centred with `transform`, not the `translate` property — the press below
+     also writes `transform`, and the two would otherwise compose and shove the
+     button off its collar. */
+  transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
   width: 4.4rem;
@@ -551,10 +589,16 @@
     /* a chromed collar around the gel */ 0 0 0 0.2rem #e6ebf0,
     0 0 0 0.26rem rgb(68 82 96 / 0.6),
     0 0.3rem 0.45rem rgb(10 24 38 / 0.4);
-  transition: transform 0.07s ease-out;
+  transition: box-shadow 0.08s ease-out;
 }
+/* It sinks into its collar. It does not move. */
 .dcenter:active:not(:disabled) {
-  transform: translate(-50%, -50%) scale(0.96);
+  box-shadow:
+    inset 0 0.22rem 0.5rem rgb(0 44 92 / 0.65),
+    inset 0 -0.1rem 0.25rem rgb(255 255 255 / 0.28),
+    0 0 0 0.2rem #e6ebf0,
+    0 0 0 0.26rem rgb(68 82 96 / 0.6),
+    0 0.1rem 0.2rem rgb(10 24 38 / 0.4);
 }
 
 .pills {

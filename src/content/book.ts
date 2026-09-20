@@ -36,6 +36,9 @@ export const person = {
   email: 'piyushgenwa@gmail.com',
   linkedin: { label: 'linkedin.com/in/piyushgenwa', href: 'https://linkedin.com/in/piyushgenwa' },
   resume: '/Piyush_Resume_26.pdf',
+  /** The shot the camera is framed on. Gosausee, Austria. */
+  viewfinder: '/photos/me.jpg',
+  viewfinderAlt: 'Piyush Genwa at a mountain lake in Austria',
 } as const;
 
 export const chapters: Chapter[] = [

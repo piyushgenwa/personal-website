@@ -38,15 +38,24 @@ function BottomBar({ children }: { children: ReactNode }) {
 export function ShootScreen({ zoom, disp, locked }: { zoom: number; disp: boolean; locked: boolean }) {
   return (
     <div className="scr">
-      <div className="scene scene-sky" style={{ transform: `scale(${1 + zoom * 0.14})` }} aria-hidden />
+      {/* The camera is pointed at its owner. Zooming pushes into the frame. */}
+      <div
+        className="scene scene-vf has-photo"
+        style={{ backgroundImage: `url(${person.viewfinder})`, transform: `scale(${1 + zoom * 0.14})` }}
+        role="img"
+        aria-label={person.viewfinderAlt}
+      />
+      <div className="vf-scrim" aria-hidden />
+
+      {/* Autofocus, hunting and then locking onto the face. */}
+      <div className="af" data-locked={locked || undefined} aria-hidden>
+        <i />
+        <i />
+        <i />
+        <i />
+      </div>
 
       <div className="subject">
-        <div className="brackets" data-locked={locked || undefined} aria-hidden>
-          <i />
-          <i />
-          <i />
-          <i />
-        </div>
         <h1 className="subject-name">{person.name}</h1>
         <p className="subject-role">{person.title}</p>
       </div>
