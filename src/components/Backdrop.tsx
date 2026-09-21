@@ -1,6 +1,7 @@
 /**
- * The Frutiger Aero wallpaper: bright sky, rolling green hill, soft cloud and a
- * scatter of glossy bubbles. Pure CSS, drawn behind everything.
+ * The wallpaper: one photographed hillside, with a scatter of glossy bubbles
+ * floating over it. The hill is a background image on `.aero`; the bubbles are
+ * the only things drawn here.
  */
 
 // x%, y%, size rem, float delay s — hand-placed so the composition is deliberate.
@@ -20,7 +21,6 @@ const BUBBLES: [number, number, number, number][] = [
 export function Backdrop() {
   return (
     <div className="aero" aria-hidden>
-      <div className="aero-sun" />
       {BUBBLES.map(([x, y, s, d], i) => (
         <span
           key={i}

@@ -38,7 +38,7 @@ body {
   margin: 0;
   font-family: var(--font-ui);
   color: var(--ink);
-  background: #54b3f3;
+  background: #4e9ee0;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -84,21 +84,7 @@ a {
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background:
-    radial-gradient(46% 20% at 18% 22%, rgb(255 255 255 / 0.9), transparent 70%),
-    radial-gradient(40% 17% at 80% 13%, rgb(255 255 255 / 0.75), transparent 70%),
-    radial-gradient(130% 46% at 22% 114%, #3fae25 0 62%, transparent 62.4%),
-    radial-gradient(120% 42% at 94% 120%, #86d84a 0 60%, transparent 60.4%),
-    linear-gradient(180deg, #1b7fe0 0%, #54b3f3 40%, #a9e2ff 70%, #dff4ff 100%);
-}
-.aero-sun {
-  position: absolute;
-  left: 50%;
-  top: -18rem;
-  width: 60rem;
-  height: 40rem;
-  transform: translateX(-50%);
-  background: radial-gradient(closest-side, rgb(255 255 255 / 0.55), transparent);
+  background: #4e9ee0 url('/camera/bliss.jpg') center / cover no-repeat;
 }
 .bubble {
   position: absolute;
