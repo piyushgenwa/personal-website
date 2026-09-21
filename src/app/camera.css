@@ -1,16 +1,12 @@
 /* ==========================================================================
-   The camera body — the physical object.
-   Everything drawn ON the LCD lives in globals.css.
+   The camera — a photograph of the hardware, with the live screen on its LCD.
+   Everything drawn ON the screen lives in globals.css.
 
-   Two ideas do most of the work here:
+   The body is pixels, so nothing here can be laid out in rem: every position
+   is a percentage of the photo's own 869 × 527 frame. Measured once against
+   the source image, they stay registered to the hardware at any size.
 
-   1. The metal is lit by the scene it sits in. Sky above, grass below, so
-      every horizontal surface runs cool white at the top and picks up a warm
-      green bounce along its bottom edge. That is what stops it reading as a
-      grey rectangle.
-   2. Nothing is drawn flat. Each part is either raised (bright top edge, dark
-      underside, cast shadow) or recessed (dark top edge, bright bottom edge).
-      Those two shadow recipes are `--raised` and `--sunken`.
+   Sections: stage · body · screen · hit areas · small screens
    ========================================================================== */
 
 .stage {
@@ -22,331 +18,64 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  padding: 3.4rem 1rem 1.4rem;
+  padding: 2rem 1rem 1.2rem;
 }
 
 /* --------------------------------------------------------------------------
-   Materials
+   Body
    -------------------------------------------------------------------------- */
 
 .cam {
-  /* Anisotropic brushing: three periods (2 / 3 / 7px) so it never moirés into
-     a regular stripe the way a single 1px repeat does. */
-  --brush: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.1) 0 1px, rgb(255 255 255 / 0) 1px 2px),
-    repeating-linear-gradient(90deg, rgb(18 32 46 / 0.055) 0 1px, rgb(18 32 46 / 0) 1px 3px),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.055) 0 2px, rgb(255 255 255 / 0) 2px 7px);
-
-  /* The broad highlight of a soft sky raking across the body. */
-  --sheen: linear-gradient(101deg, rgb(255 255 255 / 0) 20%, rgb(255 255 255 / 0.3) 36%, rgb(255 255 255 / 0) 53%);
-
-  /* Sky at the top, grass bounce at the bottom. */
-  --anodised: linear-gradient(
-    177deg,
-    #f2f7fb 0%,
-    #d2dbe3 6%,
-    #b6c0ca 26%,
-    #9fabb6 50%,
-    #8b97a3 74%,
-    #85918d 92%,
-    #8b9878 100%
-  );
-
-  /* The body is a slab, not a card: it turns away from us at both edges. */
-  --curve: linear-gradient(
-    90deg,
-    rgb(20 34 48 / 0.3) 0%,
-    rgb(20 34 48 / 0) 4.5%,
-    rgb(255 255 255 / 0.08) 22%,
-    rgb(20 34 48 / 0) 95.5%,
-    rgb(20 34 48 / 0.3) 100%
-  );
-
-  --edge: rgb(68 82 96 / 0.6);
-  --raised: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 -2px 3px rgb(16 30 45 / 0.28),
-    0 1px 2px rgb(12 39 64 / 0.35);
-  --sunken: inset 0 2px 4px rgb(10 24 38 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.55);
-
+  /* 869 / 527 — the photo's aspect. The third term keeps the whole camera
+     inside a short window instead of letting it run off the bottom. */
+  --shot-aspect: 1.649;
   position: relative;
-  width: min(100%, 62rem);
-  margin-top: 2.1rem;
-  padding: 1.15rem 1.15rem 1.35rem;
-  border-radius: 1.4rem 1.4rem 1.7rem 1.7rem;
-  background-image: var(--curve), var(--sheen), var(--brush), var(--anodised);
+  width: min(100%, 62rem, calc((100svh - 6.5rem) * var(--shot-aspect)));
+  line-height: 0;
+}
+
+.cam-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* The photo is trimmed to the body, so rounding the corners is all that is
+     needed to drop the white it was shot on. */
+  border-radius: 2.6% / 4.3%;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.95),
-    /* light off the grass catching the bottom chamfer */ inset 0 -2px 0 rgb(226 240 210 / 0.6),
-    inset 0 0 0 1px var(--edge),
-    /* contact shadow, then two of ambient occlusion */ 0 0.15rem 0.3rem rgb(12 39 64 / 0.4),
-    0 1.6rem 2.2rem -1rem rgb(12 39 64 / 0.5),
-    0 3.2rem 4.5rem -1.6rem rgb(12 39 64 / 0.45);
+    0 0.15rem 0.3rem rgb(12 39 64 / 0.4),
+    0 1.2rem 1.8rem -0.8rem rgb(12 39 64 / 0.5),
+    0 3rem 4rem -1.4rem rgb(12 39 64 / 0.45);
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 /* --------------------------------------------------------------------------
-   The top plate
+   Screen — laid into the LCD well of the photo
    -------------------------------------------------------------------------- */
-
-.deck {
-  position: absolute;
-  bottom: 100%;
-  left: 1.6%;
-  right: 1.6%;
-  height: 4.6rem;
-  margin-bottom: -0.8rem;
-  border-radius: 1.4rem 1.4rem 0.3rem 0.3rem;
-  /* Laid back so we see the plate rather than a tab stuck on the edge. The far
-     edge is darker because it is further from the light. */
-  transform: perspective(40rem) rotateX(64deg);
-  transform-origin: bottom center;
-  --deck-squash: 2.28;
-  background-image: linear-gradient(
-      90deg,
-      rgb(20 34 48 / 0.22) 0%,
-      rgb(20 34 48 / 0) 5%,
-      rgb(20 34 48 / 0) 95%,
-      rgb(20 34 48 / 0.22) 100%
-    ),
-    var(--brush), linear-gradient(180deg, #737f8a 0%, #96a2ad 12%, #c6cfd7 42%, #eaf0f5 70%, #cdd6de 100%);
-  box-shadow:
-    inset 0 0 0 1px var(--edge),
-    inset 0 2px 2px rgb(255 255 255 / 0.5);
-}
-
-.deck-brand {
-  position: absolute;
-  left: 5.5%;
-  top: 50%;
-  font-size: 1.12rem;
-  font-weight: 800;
-  font-style: italic;
-  letter-spacing: -0.01em;
-  color: rgb(28 52 80 / 0.66);
-  /* the shadow gets stretched too, so it is set at a fraction of a pixel */
-  text-shadow: 0 0.4px 0 rgb(255 255 255 / 0.55);
-  /* undo the plate's foreshortening so the mark prints true */
-  transform: translateY(-50%) scaleY(var(--deck-squash));
-  transform-origin: left center;
-}
-
-/* Two drilled microphone holes. */
-.mic {
-  position: absolute;
-  left: 42%;
-  top: 46%;
-  width: 1.6rem;
-  height: 0.42rem;
-  background: radial-gradient(circle, rgb(28 40 52 / 0.85) 0 42%, transparent 46%) 0 0 / 0.8rem 100%;
-  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.6));
-}
-
-/* A button standing on the plate is a cylinder: a cap, and a wall down to the
-   base. The plate is laid back, so its own vertical axis is squashed to
-   cos(64°) ≈ 0.44 — a wall that should read as `h` tall on screen has to be
-   drawn about 2.05 × h down the plate. That is what the stacked hard shadows
-   below are: successive slices of the wall, darkening as they turn away from
-   the light, then one soft shadow cast onto the plate itself. */
-.power {
-  position: absolute;
-  right: 26%;
-  top: 30%;
-  width: 1.45rem;
-  height: 1.45rem;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 30%, #ffffff 0 24%, #e9eff4 52%, #c4ced7 82%, #aab5bf 100%);
-  box-shadow:
-    inset 0 0 0 1px rgb(58 72 86 / 0.65),
-    0 0.100rem 0 #a9b4be,
-    0 0.200rem 0 #9fa9b3,
-    0 0.300rem 0 #949fa9,
-    0 0.400rem 0 #8a949f,
-    0 0.500rem 0 #7f8a94,
-    0 0.600rem 0 #757f8a,
-    0 0.700rem 0 #6a7580,
-    0 0.800rem 0 #606a75,
-    0 0.900rem 0 #55606b,
-    0 0.96rem 0.4rem rgb(8 20 34 / 0.55);
-}
-
-.shutter {
-  position: absolute;
-  right: 7%;
-  top: 20%;
-  width: 3.1rem;
-  height: 3.1rem;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  cursor: pointer;
-  /* A dome: the catch light sits above centre, the underside goes dark. */
-  background: radial-gradient(circle at 50% 28%, #ffffff 0 22%, #eef4f8 48%, #ccd6de 76%, #b2bdc7 100%);
-  /* the wall of the cylinder, then its shadow on the plate */
-  box-shadow:
-    inset 0 0 0 1px rgb(58 72 86 / 0.65),
-    inset 0 -0.22rem 0.32rem rgb(10 24 38 / 0.22),
-    0 0.115rem 0 #b7c1ca,
-    0 0.231rem 0 #aeb8c2,
-    0 0.346rem 0 #a6b0b9,
-    0 0.462rem 0 #9da7b1,
-    0 0.577rem 0 #949ea8,
-    0 0.692rem 0 #8b959f,
-    0 0.808rem 0 #838d97,
-    0 0.923rem 0 #7a848e,
-    0 1.038rem 0 #717b85,
-    0 1.154rem 0 #68727d,
-    0 1.269rem 0 #606a74,
-    0 1.385rem 0 #57616c,
-    0 1.500rem 0 #4e5863,
-    0 1.58rem 0.55rem rgb(8 20 34 / 0.6);
-  transition: box-shadow 0.08s ease-out, background 0.12s ease-out;
-}
-.shutter:hover {
-  background: radial-gradient(circle at 50% 30%, #ffffff 0 15%, #eaf7fe 38%, #b9dcef 68%, #8fb4c9 100%);
-}
-/* Pressed: the wall shortens, so the button sinks toward the plate. */
-.shutter:active {
-  box-shadow:
-    inset 0 0 0 1px rgb(58 72 86 / 0.65),
-    inset 0 -0.12rem 0.22rem rgb(10 24 38 / 0.3),
-    0 0.100rem 0 #a7b1bb,
-    0 0.200rem 0 #9aa4ae,
-    0 0.300rem 0 #8d97a2,
-    0 0.400rem 0 #808a95,
-    0 0.500rem 0 #737d88,
-    0 0.600rem 0 #66707b,
-    0 0.66rem 0.32rem rgb(8 20 34 / 0.55);
-}
-
-/* The fold between the top plate and the back. */
-.chamfer {
-  position: absolute;
-  top: 0;
-  left: 1.6%;
-  right: 1.6%;
-  height: 0.5rem;
-  border-radius: 1.4rem 1.4rem 0 0;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0));
-  pointer-events: none;
-}
-
-/* The strap lug, hanging off the right edge. */
-.lug {
-  position: absolute;
-  right: -0.45rem;
-  top: 2.2rem;
-  width: 0.9rem;
-  height: 1.9rem;
-  border-radius: 0.15rem 0.4rem 0.4rem 0.15rem;
-  background: linear-gradient(180deg, #e9eef2 0%, #b3bec8 22%, #7d8893 72%, #9aa5af 100%);
-  box-shadow:
-    inset 0 0 0 1px rgb(48 62 76 / 0.7),
-    0 0.15rem 0.3rem rgb(10 24 38 / 0.45);
-}
-.lug::before {
-  content: '';
-  position: absolute;
-  inset: 0.5rem 0.22rem 0.5rem 0.34rem;
-  border-radius: 0.08rem;
-  background: #10181f;
-  box-shadow: inset 0 1px 2px #000, 0 1px 0 rgb(255 255 255 / 0.4);
-}
-
-/* --------------------------------------------------------------------------
-   The back panel — a separate moulding, sunk into the body
-   -------------------------------------------------------------------------- */
-
-.shell {
-  position: relative;
-  padding: 1.05rem 1.1rem 1.35rem;
-  border-radius: 0.95rem;
-  background-image: linear-gradient(
-      103deg,
-      rgb(255 255 255 / 0) 26%,
-      rgb(255 255 255 / 0.17) 39%,
-      rgb(255 255 255 / 0) 53%
-    ),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.065) 0 1px, rgb(255 255 255 / 0) 1px 3px),
-    linear-gradient(178deg, #ccd4dc 0%, #bdc7cf 38%, #aab4be 70%, #9ea8a4 100%);
-  box-shadow: var(--sunken), inset 0 0 0 1px rgb(68 82 96 / 0.45);
-}
-
-.screw {
-  position: absolute;
-  bottom: 0.5rem;
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  background: radial-gradient(circle at 36% 30%, #f6fafc 0 20%, #c4cdd5 50%, #808a94 100%);
-  box-shadow:
-    inset 0 0 0 1px rgb(46 60 72 / 0.55),
-    0 1px 0 rgb(255 255 255 / 0.55);
-}
-.screw::before,
-.screw::after {
-  content: '';
-  position: absolute;
-  inset: 45% 18%;
-  border-radius: 0.5px;
-  background: rgb(52 66 78 / 0.8);
-}
-.screw::after {
-  transform: rotate(90deg);
-}
-.screw-l {
-  left: 0.55rem;
-}
-.screw-r {
-  right: 0.55rem;
-}
-
-.cam-face {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 15rem;
-  gap: 1.5rem;
-}
-
-/* --------------------------------------------------------------------------
-   The screen, sunk into the back
-   -------------------------------------------------------------------------- */
-
-.lcd-well {
-  padding: 0.5rem;
-  border-radius: 0.75rem;
-  background: linear-gradient(180deg, #3f4954, #262e37 34%, #171d24);
-  box-shadow:
-    inset 0 3px 5px rgb(0 0 0 / 0.8),
-    inset 0 -1px 0 rgb(255 255 255 / 0.18),
-    0 1px 0 rgb(255 255 255 / 0.6);
-}
-
-/* The cover glass: a hair larger than the picture, with a lit top edge. */
-.lcd-bezel {
-  height: min(30rem, max(19rem, calc(100svh - 15.5rem)));
-  padding: 0.45rem;
-  border-radius: 0.4rem;
-  background: linear-gradient(180deg, #10151b, #05080c);
-  box-shadow:
-    inset 0 0 0 1px rgb(150 175 200 / 0.22),
-    inset 0 1px 0 rgb(200 225 245 / 0.28);
-}
 
 .lcd {
   container-type: inline-size;
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  /* The LCD picture in the photo: x 65–626, y 52–473 of 869 × 527. */
+  left: 7.48%;
+  top: 9.87%;
+  width: 64.56%;
+  height: 79.89%;
   overflow: hidden;
-  border-radius: 0.14rem;
+  border-radius: 0.15rem;
   background: #06172c;
   color: #fff;
+  line-height: 1.5;
 }
 
-/* Reflection across the glass. */
+/* Reflection across the cover glass, plus the panel's own scanlines. */
 .lcd-glare {
   position: absolute;
   inset: 0;
   z-index: 30;
   pointer-events: none;
   background:
-    linear-gradient(118deg, rgb(255 255 255 / 0.2) 0%, rgb(255 255 255 / 0.05) 32%, transparent 33%),
+    linear-gradient(118deg, rgb(255 255 255 / 0.18) 0%, rgb(255 255 255 / 0.04) 32%, transparent 33%),
     repeating-linear-gradient(0deg, rgb(0 0 0 / 0.045) 0 1px, transparent 1px 3px);
 }
 
@@ -374,391 +103,126 @@
 }
 
 /* --------------------------------------------------------------------------
-   The controls
+   Hit areas — invisible, sitting exactly on the buttons in the photo.
+   They carry the labels and the focus ring; the button faces are photographic,
+   so a press can only be suggested, with a soft lift and a dab of shadow.
    -------------------------------------------------------------------------- */
 
-.panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.9rem;
-  padding-block: 0.1rem 0.3rem;
-}
-
-.panel-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.6rem;
-  width: 100%;
-}
-
-/* Silkscreened onto the moulding: ink, not a label. */
-.silk {
-  display: grid;
-  gap: 0.15rem;
-  padding-top: 0.2rem;
-}
-.silk span {
-  font-size: 0.56rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: rgb(52 68 84 / 0.66);
-  text-shadow: 0 1px 0 rgb(255 255 255 / 0.55);
-}
-
-/* The moulded thumb rest, with the power lamp let into it. */
-.thumb {
-  position: relative;
-  flex: none;
-  width: 2.9rem;
-  height: 2.2rem;
-  border-radius: 0.4rem 0.5rem 0.5rem 0.4rem;
-  background-image: radial-gradient(rgb(30 46 62 / 0.35) 0.85px, transparent 1px),
-    radial-gradient(rgb(255 255 255 / 0.7) 0.7px, transparent 1px),
-    linear-gradient(180deg, #c6d0d9 0%, #aab5c0 60%, #98a3ae 100%);
-  background-size: 4px 4px, 4px 4px, auto;
-  background-position: 0 0, 1px 1px, 0 0;
-  box-shadow: var(--raised), inset 0 0 0 1px rgb(68 82 96 / 0.3);
-}
-.led {
+.hit {
   position: absolute;
-  right: 0.35rem;
-  bottom: 0.3rem;
-  width: 0.34rem;
-  height: 0.34rem;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #e8ffe4, #3cd94f 55%, #12862a);
-  box-shadow: 0 0 0.45rem #52ef68, inset 0 0 0 1px rgb(0 0 0 / 0.2);
-}
-
-/* The zoom rocker: one piece that see-saws on a central pivot. */
-.zoom {
-  position: relative;
-  display: flex;
-  align-items: stretch;
-  width: 10rem;
-  height: 2.35rem;
-  border-radius: 1.2rem;
-  background: linear-gradient(180deg, #f2f6f9 0%, #d3dbe2 46%, #bcc6cf 54%, #d9e0e6 100%);
-  box-shadow: var(--raised), inset 0 0 0 1px rgb(68 82 96 / 0.55);
-}
-.zoom-btn {
-  flex: 1;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: inherit;
-  background: transparent;
-  font-size: 0.92rem;
-  font-weight: 800;
-  color: rgb(46 60 74 / 0.85);
-  text-shadow: 0 1px 0 rgb(255 255 255 / 0.85);
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform 0.07s ease-out;
-}
-.zoom-btn:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.75), rgb(140 220 255 / 0.5));
-}
-/* The end you press dips; the other end lifts. */
-.zoom-w:active:not(:disabled) {
-  transform: translateY(0.1rem) rotate(-0.7deg);
-}
-.zoom-t:active:not(:disabled) {
-  transform: translateY(0.1rem) rotate(0.7deg);
-}
-.zoom-pivot {
-  width: 1px;
-  margin-block: 0.45rem;
-  background: rgb(68 82 96 / 0.45);
-  box-shadow: 1px 0 0 rgb(255 255 255 / 0.7);
-}
-
-/* The four-way pad, in a machined well. */
-.dpad {
-  position: relative;
-  width: 11rem;
-  height: 11rem;
-  border-radius: 50%;
-  /* A conic sweep reads as circular brushing — the way a real dial is finished. */
-  background-image: radial-gradient(circle at 50% 24%, rgb(255 255 255 / 0.8) 0, rgb(255 255 255 / 0) 62%),
-    conic-gradient(
-      from 0deg,
-      #c3ccd4,
-      #edf2f6 11%,
-      #b9c3cb 24%,
-      #e6ecf1 37%,
-      #b3bdc7 50%,
-      #e9eff4 63%,
-      #b7c1c9 76%,
-      #e3eaf0 89%,
-      #c3ccd4 100%
-    ),
-    linear-gradient(180deg, #e8edf1, #a9b3bd);
-  box-shadow:
-    inset 0 -0.35rem 0.6rem rgb(16 30 45 / 0.28),
-    inset 0 0.2rem 0.2rem rgb(255 255 255 / 0.75),
-    /* the lip of the well it sits in */ 0 0 0 0.32rem #b0bac4,
-    0 0 0 0.38rem rgb(68 82 96 / 0.55),
-    0 0.3rem 0.5rem rgb(10 24 38 / 0.35);
-}
-/* The moulded groove that separates the four keys from the centre. */
-.dpad-ring {
-  position: absolute;
-  inset: 2.35rem;
-  border-radius: 50%;
-  box-shadow:
-    inset 0 1px 1px rgb(10 24 38 / 0.35),
-    0 1px 0 rgb(255 255 255 / 0.65);
-  pointer-events: none;
-}
-
-.dkey {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 3.3rem;
-  height: 3.3rem;
   padding: 0;
   border: 0;
-  border-radius: 50%;
   background: transparent;
-  color: rgb(52 66 80 / 0.9);
-  font-size: 0.8rem;
-  text-shadow: 0 1px 0 rgb(255 255 255 / 0.8);
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform 0.07s ease-out;
-}
-.dkey b {
-  font-weight: 400;
-}
-.dkey:hover:not(:disabled) {
-  color: var(--aqua-deep);
-  background: radial-gradient(circle, rgb(130 215 255 / 0.5), transparent 68%);
-}
-.dkey:active:not(:disabled) {
-  transform: scale(0.94);
-}
-.dkey-up {
-  top: 0.3rem;
-  left: 50%;
-  translate: -50% 0;
-}
-.dkey-down {
-  bottom: 0.3rem;
-  left: 50%;
-  translate: -50% 0;
-}
-.dkey-left {
-  left: 0.3rem;
-  top: 50%;
-  translate: 0 -50%;
-}
-.dkey-right {
-  right: 0.3rem;
-  top: 50%;
-  translate: 0 -50%;
-}
-
-.dcenter {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  /* Centred with `transform`, not the `translate` property — the press below
-     also writes `transform`, and the two would otherwise compose and shove the
-     button off its collar. */
-  transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
-  width: 4.4rem;
-  height: 4.4rem;
-  padding: 0;
-  border: 0;
   border-radius: 50%;
   cursor: pointer;
-  color: rgb(255 255 255 / 0.92);
-  font-size: 1.1rem;
-  text-shadow: 0 1px 2px rgb(0 50 100 / 0.6);
-  background: radial-gradient(circle at 34% 24%, #ffffff 0 7%, #b7ecff 24%, #34b3ef 62%, #0a6fba 100%);
-  box-shadow:
-    inset 0 -0.25rem 0.5rem rgb(0 60 130 / 0.55),
-    inset 0 0.15rem 0.3rem rgb(255 255 255 / 0.5),
-    /* a chromed collar around the gel */ 0 0 0 0.2rem #e6ebf0,
-    0 0 0 0.26rem rgb(68 82 96 / 0.6),
-    0 0.3rem 0.45rem rgb(10 24 38 / 0.4);
-  transition: box-shadow 0.08s ease-out;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease-out, box-shadow 0.12s ease-out;
 }
-/* It sinks into its collar. It does not move. */
-.dcenter:active:not(:disabled) {
-  box-shadow:
-    inset 0 0.22rem 0.5rem rgb(0 44 92 / 0.65),
-    inset 0 -0.1rem 0.25rem rgb(255 255 255 / 0.28),
-    0 0 0 0.2rem #e6ebf0,
-    0 0 0 0.26rem rgb(68 82 96 / 0.6),
-    0 0.1rem 0.2rem rgb(10 24 38 / 0.4);
+.hit:hover:not(:disabled) {
+  background: radial-gradient(circle, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.08) 70%, transparent 74%);
 }
-
-.pills {
-  display: flex;
-  gap: 0.55rem;
+.hit:active:not(:disabled) {
+  background: radial-gradient(circle, rgb(10 30 55 / 0.3), rgb(10 30 55 / 0.08) 70%, transparent 74%);
+  box-shadow: inset 0 1px 2px rgb(10 24 38 / 0.35);
 }
-.pill {
-  display: grid;
-  place-items: center;
-  min-width: 3.7rem;
-  height: 1.95rem;
-  padding: 0 0.5rem;
-  border: 0;
-  border-radius: 0.45rem;
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  /* debossed ink: dark mark, light catch below it */
-  color: rgb(46 60 74 / 0.9);
-  text-shadow: 0 1px 0 rgb(255 255 255 / 0.85);
-  text-decoration: none;
-  cursor: pointer;
-  background: linear-gradient(180deg, #f1f5f8 0%, #d3dbe2 48%, #bdc7d0 52%, #dbe2e8 100%);
-  box-shadow: var(--raised), inset 0 0 0 1px rgb(68 82 96 / 0.5);
-  transition: transform 0.07s ease-out, box-shadow 0.07s ease-out;
-}
-.pill:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ffffff 0%, #dcf3ff 48%, #b2dcf3 52%, #d8f0fd 100%);
-}
-.pill:active:not(:disabled) {
-  transform: translateY(0.09rem);
-  box-shadow:
-    inset 0 1px 2px rgb(16 30 45 / 0.3),
-    inset 0 0 0 1px rgb(68 82 96 / 0.5);
-}
-
-/* Drilled speaker holes. */
-.speaker {
-  width: 4.6rem;
-  height: 0.85rem;
-  background: radial-gradient(circle, rgb(38 50 62 / 0.7) 0 32%, transparent 38%) 0 0 / 0.62rem 0.42rem;
-  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.55));
-}
-
-/* Nothing here should look broken when it has no job — just unavailable. */
-.dkey:disabled,
-.dcenter:disabled,
-.pill:disabled,
-.zoom-btn:disabled,
-.shutter:disabled {
+.hit:disabled {
   cursor: default;
 }
-.dkey:disabled {
-  opacity: 0.32;
+/* Set `document.body.classList.add('cal')` to see where the hit areas sit. */
+body.cal .hit {
+  background: rgb(255 0 0 / 0.35);
+  outline: 1px solid #f00;
 }
-.pill:disabled,
-.zoom-btn:disabled {
-  opacity: 0.55;
+
+/* The zoom rocker is a rounded bar, not a disc. */
+.hit-w,
+.hit-t {
+  top: 5.3%;
+  width: 5.7%;
+  height: 6.4%;
+  border-radius: 0.2rem;
+}
+.hit-w {
+  left: 83.4%;
+}
+.hit-t {
+  left: 89.1%;
+}
+
+.hit-dial {
+  left: 80%;
+  top: 20.5%;
+  width: 15%;
+  height: 25.4%;
+}
+
+.hit-play {
+  left: 80.8%;
+  top: 48.4%;
+  width: 5.8%;
+  height: 6.3%;
+}
+
+/* The four-way wheel: four sectors around a centre button. */
+.hit-up,
+.hit-down {
+  left: 85.2%;
+  width: 5.1%;
+  height: 7.2%;
+}
+.hit-up {
+  top: 59.2%;
+}
+.hit-down {
+  top: 74.8%;
+}
+.hit-left,
+.hit-right {
+  top: 66.4%;
+  width: 4.4%;
+  height: 8.3%;
+}
+.hit-left {
+  left: 80.8%;
+}
+.hit-right {
+  left: 90.2%;
+}
+.hit-ok {
+  left: 85.2%;
+  top: 66.4%;
+  width: 5.1%;
+  height: 8.3%;
+}
+
+.hit-menu {
+  left: 80.8%;
+  top: 85.6%;
+  width: 5.8%;
+  height: 6.8%;
+}
+.hit-disp {
+  left: 90.6%;
+  top: 84.8%;
+  width: 5.6%;
+  height: 6.8%;
 }
 
 /* --------------------------------------------------------------------------
-   Held upright: screen on top, controls below
+   Small screens — the photo cannot restack, so it simply scales.
    -------------------------------------------------------------------------- */
 
 @media (max-width: 56rem) {
   .stage {
-    padding: 3rem 0.6rem 1rem;
-    justify-content: flex-start;
+    padding: 1.2rem 0.5rem 1rem;
   }
   .cam {
-    padding: 0.6rem;
-    border-radius: 1.2rem 1.2rem 1.4rem 1.4rem;
-  }
-  .deck {
-    height: 3.4rem;
-    margin-bottom: -0.6rem;
-    border-radius: 1.1rem 1.1rem 0.3rem 0.3rem;
-  }
-  .deck-brand {
-    font-size: 1.15rem;
-  }
-  .shutter {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-  .power {
-    width: 1.2rem;
-    height: 1.2rem;
-  }
-  .lug {
-    top: 2.4rem;
-  }
-  .shell {
-    padding: 0.75rem 0.8rem 1.1rem;
-  }
-  .cam-face {
-    grid-template-columns: 1fr;
-    gap: 0.9rem;
-  }
-  .lcd-bezel {
-    height: clamp(23rem, 58svh, 34rem);
-    padding: 0.35rem;
-  }
-  .panel {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-areas:
-      'silk silk'
-      'dpad zoom'
-      'dpad pills'
-      'dpad speaker';
-    align-items: center;
-    justify-items: center;
-    gap: 0.75rem 1rem;
-  }
-  .panel-top {
-    grid-area: silk;
-  }
-  .dpad {
-    grid-area: dpad;
-    width: 9.2rem;
-    height: 9.2rem;
-  }
-  .dpad-ring {
-    inset: 1.95rem;
-  }
-  .dkey {
-    width: 2.7rem;
-    height: 2.7rem;
-  }
-  .dcenter {
-    width: 3.7rem;
-    height: 3.7rem;
-  }
-  .zoom {
-    grid-area: zoom;
-    width: 100%;
-    max-width: 9.5rem;
-    height: 2.1rem;
-  }
-  .pills {
-    grid-area: pills;
-    gap: 0.4rem;
-    justify-content: center;
-  }
-  .pill {
-    min-width: 0;
-    padding: 0 0.6rem;
-  }
-  .speaker {
-    grid-area: speaker;
+    width: min(100%, calc((100svh - 5rem) * var(--shot-aspect)));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shutter,
-  .pill,
-  .dkey,
-  .dcenter,
-  .zoom-btn {
+  .hit {
     transition: none;
   }
 }
