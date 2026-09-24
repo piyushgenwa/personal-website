@@ -6,6 +6,12 @@
  * number there if it also appears in the entry's own bullets.
  */
 
+/** An impact number. On the camera, each one is a picture in its job's folder. */
+export interface Figure {
+  value: string;
+  label: string;
+}
+
 export interface Role {
   title: string;
   place: string;
@@ -13,8 +19,8 @@ export interface Role {
   /** The italic line under the role on the résumé. */
   blurb?: string;
   bullets: string[];
-  /** Numbers pulled into the page foot. Only use ones that also appear in `bullets`. */
-  figures?: { value: string; label: string }[];
+  /** Impact numbers. Only use ones that also appear in `bullets`. */
+  figures?: Figure[];
 }
 
 export interface Chapter {
@@ -25,8 +31,10 @@ export interface Chapter {
   /** One line for the contents page. */
   span: string;
   roles: Role[];
-  /** Plates (project slugs) this chapter points to. */
+  /** Projects (slugs) built here. On the camera they go in this chapter's folder. */
   plates?: string[];
+  /** Shown as a single picture on the main menu instead of a folder. */
+  single?: boolean;
 }
 
 export const person = {
@@ -146,6 +154,7 @@ export const chapters: Chapter[] = [
     numeral: 'IV',
     title: 'IIT Bombay',
     span: '2018 – 2022',
+    single: true,
     roles: [
       {
         title: 'BTech, Electrical Engineering',

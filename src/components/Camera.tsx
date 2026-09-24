@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { person } from '@/content/book';
-import { frameIndex, roll } from '@/content/roll';
+import { getFolder, locate, menu, roll } from '@/content/roll';
 import { CameraBody, type ControlName, type Controls } from './CameraBody';
 import { IndexScreen, MenuOverlay, PhotoScreen, ShootScreen, type MenuItem } from './lcd';
 
@@ -10,8 +10,10 @@ import { IndexScreen, MenuOverlay, PhotoScreen, ShootScreen, type MenuItem } fro
  * The working camera. Three screens, like the real thing:
  *
  *   shoot  → viewfinder. Shutter (or ●) takes "the picture" and lands on…
- *   index  → the photo roll as thumbnails. ● / T opens one.
- *   photo  → one picture. ◀ ▶ step through the roll, ▲ ▼ scroll, W goes back to the index.
+ *   index  → the main menu: folders, one per job, and loose pictures. ● / T
+ *            opens a folder (its own index) or a picture. W backs out of a folder.
+ *   photo  → one picture. ◀ ▶ step through the pictures around it — within its
+ *            folder, never out of it. ▲ ▼ scroll, W goes back to the index it came from.
  *
  * Shutter from anywhere but the viewfinder returns to the viewfinder — a real
  * camera's half-press does the same. MENU opens the list; DISP hides the HUD.
@@ -23,8 +25,13 @@ const FLASH_MS = 520;
 
 export function Camera() {
   const [screen, setScreen] = useState<Screen>('shoot');
+  /** The folder being browsed, or null for the main menu. */
+  const [folder, setFolder] = useState<string | null>(null);
+  /** The cursor on the index. */
   const [sel, setSel] = useState(0);
-  const [menu, setMenu] = useState(false);
+  /** The picture open on the photo screen. */
+  const [shot, setShot] = useState(roll[0].id);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [menuSel, setMenuSel] = useState(0);
   const [disp, setDisp] = useState(true);
   const [zoom, setZoom] = useState(0);
@@ -33,6 +40,9 @@ export function Camera() {
   const [dir, setDir] = useState<1 | -1>(1);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const busy = useRef(false);
+
+  const items = (folder && getFolder(folder)?.frames) || menu;
+  const here = locate(shot);
 
   const setHash = (h: string) => {
     try {
@@ -44,26 +54,49 @@ export function Camera() {
     setScreen('shoot');
     setHash('');
   }, []);
-  const toIndex = useCallback(() => {
+
+  /** An index: the main menu, or a folder's. `at` places the cursor. */
+  const toIndex = useCallback((f: string | null, at = 0) => {
+    setFolder(f);
+    setSel(at);
     setScreen('index');
-    setHash('roll');
+    setHash(f ?? 'roll');
   }, []);
-  const toPhoto = useCallback((i: number, d: 1 | -1 = 1) => {
-    const n = Math.min(roll.length - 1, Math.max(0, i));
+
+  const toPhoto = useCallback((id: string, d: 1 | -1 = 1) => {
+    const where = locate(id);
+    if (!where) return;
+    setFolder(where.folder?.id ?? null);
+    // Coming back out lands the cursor on this picture.
+    setSel((where.folder ? where.folder.frames : menu).findIndex((e) => e.id === id));
+    setShot(id);
     setDir(d);
-    setSel(n);
     setScreen('photo');
-    setHash(roll[n].id);
+    setHash(id);
   }, []);
+
+  /** Back out of a folder, to its tile on the main menu. */
+  const leaveFolder = () => {
+    if (folder) toIndex(null, menu.findIndex((e) => e.id === folder));
+  };
+
+  const open = (i: number) => {
+    const e = items[i];
+    if (!e) return;
+    if (e.kind === 'folder') toIndex(e.id, 0);
+    else toPhoto(e.id);
+  };
+
+  const step = (d: 1 | -1) => {
+    const next = here?.frames[here.index + d];
+    if (next) toPhoto(next.id, d);
+  };
 
   const capture = useCallback(() => {
     if (busy.current) return;
     busy.current = true;
     setFlash(true);
-    setTimeout(() => {
-      setSel(0);
-      toIndex();
-    }, 170);
+    setTimeout(() => toIndex(null, 0), 170);
     setTimeout(() => {
       setFlash(false);
       busy.current = false;
@@ -81,11 +114,11 @@ export function Camera() {
   // A picture always opens scrolled to the top.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
-  }, [sel, screen]);
+  }, [shot, screen]);
 
-  const items: MenuItem[] = useMemo(
+  const menuItems: MenuItem[] = useMemo(
     () => [
-      { label: 'Photo roll', run: toIndex },
+      { label: 'Photo roll', run: () => toIndex(null, 0) },
       { label: 'Résumé (PDF)', run: () => window.open(person.resume, '_blank') },
       { label: 'Email me', run: () => (location.href = `mailto:${person.email}`) },
       { label: 'LinkedIn', run: () => window.open(person.linkedin.href, '_blank', 'noreferrer') },
@@ -97,22 +130,22 @@ export function Camera() {
   const press = (k: ControlName) => {
     if (k === 'disp') return setDisp((d) => !d);
 
-    if (menu) {
-      if (k === 'up') setMenuSel((s) => (s + items.length - 1) % items.length);
-      else if (k === 'down') setMenuSel((s) => (s + 1) % items.length);
+    if (menuOpen) {
+      if (k === 'up') setMenuSel((s) => (s + menuItems.length - 1) % menuItems.length);
+      else if (k === 'down') setMenuSel((s) => (s + 1) % menuItems.length);
       else if (k === 'center' || k === 'tele' || k === 'right') {
-        setMenu(false);
-        items[menuSel].run();
-      } else setMenu(false);
+        setMenuOpen(false);
+        menuItems[menuSel].run();
+      } else setMenuOpen(false);
       return;
     }
 
     if (k === 'menu') {
-      setMenu(true);
+      setMenuOpen(true);
       setMenuSel(0);
       return;
     }
-    if (k === 'play') return toIndex();
+    if (k === 'play') return toIndex(null, 0);
     if (k === 'shutter') return screen === 'shoot' ? capture() : toShoot();
 
     if (screen === 'shoot') {
@@ -121,36 +154,35 @@ export function Camera() {
       else if (k === 'wide') setZoom((z) => Math.max(0, z - 1));
     } else if (screen === 'index') {
       if (k === 'left') setSel((s) => Math.max(0, s - 1));
-      else if (k === 'right') setSel((s) => Math.min(roll.length - 1, s + 1));
+      else if (k === 'right') setSel((s) => Math.min(items.length - 1, s + 1));
       else if (k === 'up') setSel((s) => (s - COLS >= 0 ? s - COLS : s));
-      else if (k === 'down') setSel((s) => (s + COLS < roll.length ? s + COLS : s));
-      else if (k === 'center' || k === 'tele') toPhoto(sel);
+      else if (k === 'down') setSel((s) => (s + COLS < items.length ? s + COLS : s));
+      else if (k === 'center' || k === 'tele') open(sel);
+      else if (k === 'wide') leaveFolder();
     } else {
-      if (k === 'left') toPhoto(sel - 1, -1);
-      else if (k === 'right') toPhoto(sel + 1, 1);
+      if (k === 'left') step(-1);
+      else if (k === 'right') step(1);
       else if (k === 'up') scrollRef.current?.scrollBy({ top: -110, behavior: 'smooth' });
       else if (k === 'down') scrollRef.current?.scrollBy({ top: 110, behavior: 'smooth' });
-      else if (k === 'wide' || k === 'center') toIndex();
+      else if (k === 'wide' || k === 'center') toIndex(folder, sel);
     }
   };
 
-  // Deep links: /#roll opens the index, /#jar opens that picture.
+  // Deep links: /#roll opens the main menu, /#sourcy that folder, /#sourcy-1 or
+  // /#flores that picture.
   useEffect(() => {
     const fromHash = () => {
-      setMenu(false);
+      setMenuOpen(false);
       const h = decodeURIComponent(location.hash.slice(1));
       if (!h) return setScreen('shoot');
-      if (h === 'roll') return setScreen('index');
-      const i = frameIndex(h);
-      if (i >= 0) {
-        setSel(i);
-        setScreen('photo');
-      }
+      if (h === 'roll') return toIndex(null, 0);
+      if (getFolder(h)) return toIndex(h, 0);
+      if (locate(h)) toPhoto(h);
     };
     fromHash();
     window.addEventListener('hashchange', fromHash);
     return () => window.removeEventListener('hashchange', fromHash);
-  }, []);
+  }, [toIndex, toPhoto]);
 
   // Keyboard mirrors the hardware. Handler reads the latest `press` via a ref.
   const pressRef = useRef(press);
@@ -174,14 +206,16 @@ export function Camera() {
       let k: ControlName | undefined = map[e.key.length === 1 ? e.key.toLowerCase() : e.key];
       if (e.key === 'Enter' && !onControl) k = 'center';
       if (e.key === ' ' && !onControl) k = 'shutter';
-      if (e.key === 'Escape') k = menu ? 'menu' : screen === 'photo' ? 'wide' : 'shutter';
+      if (e.key === 'Escape') {
+        k = menuOpen ? 'menu' : screen === 'photo' || (screen === 'index' && folder) ? 'wide' : 'shutter';
+      }
       if (!k) return;
       if (e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault();
       pressRef.current(k);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [menu, screen]);
+  }, [menuOpen, screen, folder]);
 
   // Swipe through pictures on touch screens.
   const swipe = useRef<{ x: number; y: number } | null>(null);
@@ -203,34 +237,40 @@ export function Camera() {
     ).map((k) => [k, { onClick: () => press(k) }]),
   );
 
+  const title = (folder && getFolder(folder)?.label) || 'Index';
+
   return (
     <div onPointerDown={onPointerDown} onPointerUp={onPointerUp} style={{ display: 'contents' }}>
       <CameraBody controls={controls} flash={flash} lcdLabel={`Camera screen — ${screen}`}>
         {screen === 'shoot' && <ShootScreen zoom={zoom} disp={disp} locked={locked} />}
-        {screen === 'index' && <IndexScreen sel={sel} disp={disp} onPick={(i) => toPhoto(i)} />}
-        {screen === 'photo' && (
+        {screen === 'index' && (
+          <IndexScreen title={title} items={items} sel={sel} disp={disp} inFolder={!!folder} onPick={open} />
+        )}
+        {screen === 'photo' && here && (
           <PhotoScreen
-            frame={roll[sel]}
-            index={sel}
+            frame={here.frames[here.index]}
+            index={here.index}
+            total={here.frames.length}
             disp={disp}
             dir={dir}
             scrollRef={scrollRef}
-            onJump={(id) => toPhoto(frameIndex(id))}
+            onJump={(id) => toPhoto(id)}
           />
         )}
-        {menu && (
+        {menuOpen && (
           <MenuOverlay
-            items={items}
+            items={menuItems}
             sel={menuSel}
             onPick={(i) => {
-              setMenu(false);
-              items[i].run();
+              setMenuOpen(false);
+              menuItems[i].run();
             }}
           />
         )}
       </CameraBody>
       <p className="stage-hint keys">
-        <kbd>← → ↑ ↓</kbd> move <kbd>Enter</kbd> ● <kbd>Space</kbd> shutter <kbd>M</kbd> menu <kbd>D</kbd> display
+        <kbd>← → ↑ ↓</kbd> move <kbd>Enter</kbd> ● <kbd>W</kbd> back <kbd>Space</kbd> shutter <kbd>M</kbd> menu{' '}
+        <kbd>D</kbd> display
       </p>
     </div>
   );

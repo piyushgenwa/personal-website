@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Open_Sans, Share_Tech_Mono } from 'next/font/google';
+import { Great_Vibes, Open_Sans, Share_Tech_Mono } from 'next/font/google';
 import { person } from '@/content/book';
 import './globals.css';
 import './camera.css';
@@ -19,6 +19,14 @@ const shareTech = Share_Tech_Mono({
   display: 'swap',
 });
 
+// The handwritten greeting shown while the camera loads.
+const greatVibes = Great_Vibes({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-script',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: `${person.name} — ${person.title}`,
   description:
@@ -27,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${openSans.variable} ${shareTech.variable}`}>
+    <html lang="en" className={`${openSans.variable} ${shareTech.variable} ${greatVibes.variable}`}>
       <body>{children}</body>
     </html>
   );

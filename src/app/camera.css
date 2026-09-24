@@ -15,6 +15,8 @@
   justify-content: center;
   gap: 1rem;
   padding: 2rem 1rem 1.2rem;
+  /* The screen is placed by a 3D transform; never let it widen the page. */
+  overflow-x: clip;
 }
 
 /* --------------------------------------------------------------------------
@@ -33,6 +35,64 @@
 }
 .cam canvas {
   touch-action: pan-y;
+}
+
+/* The model and its screen. Hidden until the camera has been drawn, then
+   brought up in one piece — never a half-lit body or an empty screen. */
+.cam-body {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  translate: 0 0.8rem;
+  transition:
+    opacity 0.7s ease-out,
+    translate 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.cam[data-ready] .cam-body {
+  opacity: 1;
+  translate: none;
+}
+
+/* The key hints below the camera wait for it too. */
+.stage-hint {
+  transition: opacity 0.6s ease-out 0.3s;
+}
+.stage:has(.cam:not([data-ready])) .stage-hint {
+  opacity: 0;
+}
+
+/* First visit only: a handwritten greeting while the camera loads. It writes
+   itself left to right, then fades as the camera comes up. */
+.hello {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  font-family: var(--font-script), cursive;
+  font-size: clamp(3.4rem, 10vw, 8rem);
+  line-height: 1.3;
+  color: #fff;
+  text-shadow:
+    0 2px 18px rgb(0 60 120 / 0.55),
+    0 0 2px rgb(255 255 255 / 0.6);
+  pointer-events: none;
+  transition: opacity 0.6s ease-out;
+}
+.hello span {
+  /* Script glyphs overhang their box, so the wipe reaches past it. */
+  animation: write 1.6s cubic-bezier(0.45, 0.05, 0.35, 1) both;
+}
+.hello[data-gone] {
+  opacity: 0;
+}
+@keyframes write {
+  from {
+    clip-path: inset(-30% 100% -30% -15%);
+  }
+  to {
+    clip-path: inset(-30% -15% -30% -15%);
+  }
 }
 
 /* The hardware as real buttons, off-screen, for keyboards and screen readers. */
@@ -96,6 +156,30 @@
 /* --------------------------------------------------------------------------
    Small screens — the model cannot restack, so it simply scales.
    -------------------------------------------------------------------------- */
+
+/* Held upright on a portrait screen: the canvas turns tall with the body.
+   Same query as the JS that turns the model. */
+@media (orientation: portrait) {
+  .cam {
+    --shot-aspect: 0.6064; /* 1 / 1.649 */
+  }
+}
+
+/* Keyboard hints mean nothing on a touch screen. */
+@media (hover: none) {
+  .stage-hint.keys {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hello span {
+    animation: none;
+  }
+  .cam-body {
+    translate: none;
+  }
+}
 
 @media (max-width: 56rem) {
   .stage {

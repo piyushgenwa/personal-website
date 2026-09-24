@@ -4,7 +4,7 @@ import { Backdrop } from '@/components/Backdrop';
 import { CameraBody, type Controls } from '@/components/CameraBody';
 import { person } from '@/content/book';
 import { getProject, projects } from '@/content/projects';
-import { frameIndex, roll } from '@/content/roll';
+import { locate } from '@/content/roll';
 
 /**
  * A case study, shown on the camera's LCD in playback. The hardware still works:
@@ -32,18 +32,21 @@ export default async function CaseStudy({ params }: Params) {
   const project = getProject(slug);
   if (!project) notFound();
 
-  const i = frameIndex(slug);
-  const frame = roll[i];
-  const prev = roll[i - 1];
-  const next = roll[i + 1];
+  // ◀ ▶ step through the pictures around this one — its folder's, or the main menu's.
+  const here = locate(slug)!;
+  const i = here.index;
+  const frame = here.frames[i];
+  const prev = here.frames[i - 1];
+  const next = here.frames[i + 1];
+  const back = `/#${here.folder?.id ?? 'roll'}`;
   const hrefFor = (id: string) => (getProject(id) ? `/work/${id}` : `/#${id}`);
 
   const controls: Controls = {
     left: prev ? { href: hrefFor(prev.id) } : undefined,
     right: next ? { href: hrefFor(next.id) } : undefined,
-    wide: { href: '/#roll' },
+    wide: { href: back },
     play: { href: '/#roll' },
-    center: { href: '/#roll' },
+    center: { href: back },
     menu: { href: '/#roll' },
     shutter: { href: '/' },
   };
@@ -117,7 +120,7 @@ export default async function CaseStudy({ params }: Params) {
           <span className="stamp mono">{frame.stamp}</span>
           <div className="hud hud-top">
             <span>
-              <b className="badge">▶</b> <span className="mono">{`${pad(i + 1)}/${pad(roll.length)}`}</span>
+              <b className="badge">▶</b> <span className="mono">{`${pad(i + 1)}/${pad(here.frames.length)}`}</span>
             </span>
             <span className="hud-right">
               <span className="mono">12M</span>
@@ -131,7 +134,7 @@ export default async function CaseStudy({ params }: Params) {
         </div>
       </CameraBody>
       <p className="stage-hint">
-        <a href="/#roll">← Back to the photo roll</a>
+        <a href={back}>← Back to {here.folder ? here.folder.label : 'the photo roll'}</a>
       </p>
     </main>
   );

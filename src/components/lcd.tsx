@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode, RefObject } from 'react';
 import { person } from '@/content/book';
-import { roll, type Frame } from '@/content/roll';
+import { roll, type Entry, type Frame } from '@/content/roll';
 
 /** The things drawn on the LCD. All presentational; <Camera> owns the state. */
 
@@ -44,16 +44,19 @@ export function ShootScreen({ zoom, disp, locked }: { zoom: number; disp: boolea
         style={{ backgroundImage: `url(${person.viewfinder})`, transform: `scale(${1 + zoom * 0.14})` }}
         role="img"
         aria-label={person.viewfinderAlt}
-      />
-      <div className="vf-scrim" aria-hidden />
-
-      {/* Autofocus, hunting and then locking onto the face. */}
-      <div className="af" data-locked={locked || undefined} aria-hidden>
-        <i />
-        <i />
-        <i />
-        <i />
+      >
+        {/* Autofocus, hunting and then locking onto the face. It lives in the
+            photo's own frame, so it stays on the face at any screen shape and zoom. */}
+        <div className="vf-frame" aria-hidden>
+          <div className="af" data-locked={locked || undefined}>
+            <i />
+            <i />
+            <i />
+            <i />
+          </div>
+        </div>
       </div>
+      <div className="vf-scrim" aria-hidden />
 
       <div className="subject">
         <h1 className="subject-name">{person.name}</h1>
@@ -92,31 +95,44 @@ export function ShootScreen({ zoom, disp, locked }: { zoom: number; disp: boolea
 /* ───────────────────────── Photo index ───────────────────────── */
 
 export function IndexScreen({
+  title,
+  items,
   sel,
   disp,
+  inFolder,
   onPick,
 }: {
+  /** "Index" on the main menu, the folder's name inside one. */
+  title: string;
+  items: Entry[];
   sel: number;
   disp: boolean;
+  inFolder: boolean;
   onPick: (i: number) => void;
 }) {
   return (
     <div className="scr scr-index">
       <div className="index-grid">
-        {roll.map((f, i) => (
+        {items.map((e, i) => (
           <button
-            key={f.id}
+            key={e.id}
             type="button"
-            className={`tile scene-${f.scene}${f.photo ? ' has-photo' : ''}`}
-            style={f.photo ? { backgroundImage: `url(${f.photo})` } : undefined}
+            className={`tile scene-${e.scene}${e.photo ? ' has-photo' : ''}${e.kind === 'folder' ? ' tile-folder' : ''}`}
+            style={e.photo ? { backgroundImage: `url(${e.photo})` } : undefined}
             data-sel={i === sel || undefined}
             aria-current={i === sel || undefined}
             onClick={() => onPick(i)}
           >
-            <span className="tile-num mono">{pad(i + 1)}</span>
+            {e.kind === 'folder' ? (
+              <span className="tile-num mono">
+                <i className="folder-ico" aria-hidden /> {e.frames.length}
+              </span>
+            ) : (
+              <span className="tile-num mono">{pad(i + 1)}</span>
+            )}
             <span className="tile-label">
-              <b>{f.label}</b>
-              <small>{f.kind === 'role' ? f.sub : f.kind === 'project' ? f.project.year : 'Contact'}</small>
+              <b className={e.kind === 'figure' ? 'tile-figure' : undefined}>{e.label}</b>
+              <small>{tileSub(e)}</small>
             </span>
           </button>
         ))}
@@ -126,24 +142,38 @@ export function IndexScreen({
           <TopBar
             left={
               <>
-                <b className="badge">▶</b> Index
+                <b className="badge">▶</b> {title}
               </>
             }
             right={
               <span className="mono">
-                {pad(sel + 1)}/{pad(roll.length)}
+                {pad(sel + 1)}/{pad(items.length)}
               </span>
             }
           />
           <BottomBar>
             <span>◀▶▲▼ Select</span>
-            <span>● View</span>
-            <span>MENU</span>
+            <span>● {items[sel]?.kind === 'folder' ? 'Open' : 'View'}</span>
+            <span>{inFolder ? 'W Back' : 'MENU'}</span>
           </BottomBar>
         </>
       )}
     </div>
   );
+}
+
+function tileSub(e: Entry) {
+  switch (e.kind) {
+    case 'folder':
+    case 'role':
+      return e.sub;
+    case 'figure':
+      return e.figure.label;
+    case 'project':
+      return e.project.year;
+    case 'contact':
+      return 'Contact';
+  }
 }
 
 /* ───────────────────────── One picture ───────────────────────── */
@@ -200,6 +230,20 @@ function FrameBody({ frame, onJump }: { frame: Frame; onJump: (id: string) => vo
           )}
         </aside>
       </>
+    );
+  }
+
+  if (frame.kind === 'figure') {
+    const { chapter, role, figure } = frame;
+    return (
+      <div className="figure">
+        <p className="eyebrow">{chapter.title} · Impact</p>
+        <p className="figure-value">{figure.value}</p>
+        <h2 className="figure-label">{figure.label}</h2>
+        <p className="meta">
+          {role.title} · {role.dates}
+        </p>
+      </div>
     );
   }
 
@@ -263,13 +307,16 @@ function FrameBody({ frame, onJump }: { frame: Frame; onJump: (id: string) => vo
 export function PhotoScreen({
   frame,
   index,
+  total,
   disp,
   dir,
   scrollRef,
   onJump,
 }: {
   frame: Frame;
+  /** Its place among the pictures it sits with — a folder's, or the main menu's. */
   index: number;
+  total: number;
   disp: boolean;
   dir: 1 | -1;
   scrollRef: RefObject<HTMLDivElement | null>;
@@ -283,7 +330,7 @@ export function PhotoScreen({
         aria-hidden
       />
       <div className="photo-scroll" ref={scrollRef} tabIndex={0}>
-        <article className={`photo-card glass${frame.kind === 'contact' ? '' : ' photo-card--split'}`}>
+        <article className={`photo-card glass${frame.kind === 'role' || frame.kind === 'project' ? ' photo-card--split' : ''}`}>
           <FrameBody frame={frame} onJump={onJump} />
         </article>
       </div>
@@ -295,7 +342,7 @@ export function PhotoScreen({
           <TopBar
             left={
               <>
-                <b className="badge">▶</b> <span className="mono">{`${pad(index + 1)}/${pad(roll.length)}`}</span>
+                <b className="badge">▶</b> <span className="mono">{`${pad(index + 1)}/${pad(total)}`}</span>
               </>
             }
             right={<span className="mono">12M</span>}
@@ -303,7 +350,7 @@ export function PhotoScreen({
           <BottomBar>
             <span className="mono">101-{String(index + 1).padStart(4, '0')}</span>
             <span>◀ ▶ Next</span>
-            <span>▲▼ Scroll · W Index</span>
+            <span>▲▼ Scroll · W Back</span>
           </BottomBar>
         </>
       )}
