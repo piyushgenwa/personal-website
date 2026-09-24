@@ -1,12 +1,8 @@
 /* ==========================================================================
-   The camera — a photograph of the hardware, with the live screen on its LCD.
+   The camera — a 3D model of the hardware, with the live screen on its LCD.
    Everything drawn ON the screen lives in globals.css.
 
-   The body is pixels, so nothing here can be laid out in rem: every position
-   is a percentage of the photo's own 869 × 527 frame. Measured once against
-   the source image, they stay registered to the hardware at any size.
-
-   Sections: stage · body · screen · hit areas · small screens
+   Sections: stage · body · screen · small screens
    ========================================================================== */
 
 .stage {
@@ -22,47 +18,42 @@
 }
 
 /* --------------------------------------------------------------------------
-   Body
+   Body — the model's canvas
    -------------------------------------------------------------------------- */
 
 .cam {
-  /* 869 / 527 — the photo's aspect. The third term keeps the whole camera
-     inside a short window instead of letting it run off the bottom. */
+  /* The canvas is framed around the model at this aspect, so it can be sized
+     from width alone. The third term keeps the whole camera inside a short
+     window instead of letting it run off the bottom. */
   --shot-aspect: 1.649;
   position: relative;
   width: min(100%, 62rem, calc((100svh - 6.5rem) * var(--shot-aspect)));
+  aspect-ratio: var(--shot-aspect);
   line-height: 0;
 }
+.cam canvas {
+  touch-action: pan-y;
+}
 
-.cam-photo {
-  display: block;
-  width: 100%;
-  height: auto;
-  /* The photo is trimmed to the body, so rounding the corners is all that is
-     needed to drop the white it was shot on. */
-  border-radius: 2.6% / 4.3%;
-  box-shadow:
-    0 0.15rem 0.3rem rgb(12 39 64 / 0.4),
-    0 1.2rem 1.8rem -0.8rem rgb(12 39 64 / 0.5),
-    0 3rem 4rem -1.4rem rgb(12 39 64 / 0.45);
-  user-select: none;
-  -webkit-user-drag: none;
+/* The hardware as real buttons, off-screen, for keyboards and screen readers. */
+.cam-keys {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* --------------------------------------------------------------------------
-   Screen — laid into the LCD well of the photo
+   Screen — placed on the model's LCD by a 3D transform. Width and height are
+   set inline from the screen's own size.
    -------------------------------------------------------------------------- */
 
 .lcd {
   container-type: inline-size;
-  position: absolute;
-  /* The LCD picture in the photo: x 65–626, y 52–473 of 869 × 527. */
-  left: 7.48%;
-  top: 9.87%;
-  width: 64.56%;
-  height: 79.89%;
+  position: relative;
   overflow: hidden;
-  border-radius: 0.15rem;
   background: #06172c;
   color: #fff;
   line-height: 1.5;
@@ -103,113 +94,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Hit areas — invisible, sitting exactly on the buttons in the photo.
-   They carry the labels and the focus ring; the button faces are photographic,
-   so a press can only be suggested, with a soft lift and a dab of shadow.
-   -------------------------------------------------------------------------- */
-
-.hit {
-  position: absolute;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  border-radius: 50%;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.12s ease-out, box-shadow 0.12s ease-out;
-}
-.hit:hover:not(:disabled) {
-  background: radial-gradient(circle, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.08) 70%, transparent 74%);
-}
-.hit:active:not(:disabled) {
-  background: radial-gradient(circle, rgb(10 30 55 / 0.3), rgb(10 30 55 / 0.08) 70%, transparent 74%);
-  box-shadow: inset 0 1px 2px rgb(10 24 38 / 0.35);
-}
-.hit:disabled {
-  cursor: default;
-}
-/* Set `document.body.classList.add('cal')` to see where the hit areas sit. */
-body.cal .hit {
-  background: rgb(255 0 0 / 0.35);
-  outline: 1px solid #f00;
-}
-
-/* The zoom rocker is a rounded bar, not a disc. */
-.hit-w,
-.hit-t {
-  top: 5.3%;
-  width: 5.7%;
-  height: 6.4%;
-  border-radius: 0.2rem;
-}
-.hit-w {
-  left: 83.4%;
-}
-.hit-t {
-  left: 89.1%;
-}
-
-.hit-dial {
-  left: 80%;
-  top: 20.5%;
-  width: 15%;
-  height: 25.4%;
-}
-
-.hit-play {
-  left: 80.8%;
-  top: 48.4%;
-  width: 5.8%;
-  height: 6.3%;
-}
-
-/* The four-way wheel: four sectors around a centre button. */
-.hit-up,
-.hit-down {
-  left: 85.2%;
-  width: 5.1%;
-  height: 7.2%;
-}
-.hit-up {
-  top: 59.2%;
-}
-.hit-down {
-  top: 74.8%;
-}
-.hit-left,
-.hit-right {
-  top: 66.4%;
-  width: 4.4%;
-  height: 8.3%;
-}
-.hit-left {
-  left: 80.8%;
-}
-.hit-right {
-  left: 90.2%;
-}
-.hit-ok {
-  left: 85.2%;
-  top: 66.4%;
-  width: 5.1%;
-  height: 8.3%;
-}
-
-.hit-menu {
-  left: 80.8%;
-  top: 85.6%;
-  width: 5.8%;
-  height: 6.8%;
-}
-.hit-disp {
-  left: 90.6%;
-  top: 84.8%;
-  width: 5.6%;
-  height: 6.8%;
-}
-
-/* --------------------------------------------------------------------------
-   Small screens — the photo cannot restack, so it simply scales.
+   Small screens — the model cannot restack, so it simply scales.
    -------------------------------------------------------------------------- */
 
 @media (max-width: 56rem) {
@@ -218,11 +103,5 @@ body.cal .hit {
   }
   .cam {
     width: min(100%, calc((100svh - 5rem) * var(--shot-aspect)));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hit {
-    transition: none;
   }
 }
