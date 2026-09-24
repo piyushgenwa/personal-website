@@ -1,35 +1,41 @@
 import type { Metadata } from 'next';
-import { Bricolage_Grotesque, Instrument_Sans, IBM_Plex_Mono } from 'next/font/google';
-import { site } from '@/content/site';
+import { Great_Vibes, Open_Sans, Share_Tech_Mono } from 'next/font/google';
+import { person } from '@/content/book';
 import './globals.css';
+import './camera.css';
 
-const bricolage = Bricolage_Grotesque({
+// Open Sans is the closest free cousin of Frutiger, the face of every Aero UI.
+const openSans = Open_Sans({
   subsets: ['latin'],
-  variable: '--font-bricolage',
+  variable: '--font-open-sans',
   display: 'swap',
 });
 
-const instrument = Instrument_Sans({
+// LCD numerals and the orange date stamp.
+const shareTech = Share_Tech_Mono({
   subsets: ['latin'],
-  variable: '--font-instrument',
+  weight: '400',
+  variable: '--font-share-tech',
   display: 'swap',
 });
 
-const plexMono = IBM_Plex_Mono({
+// The handwritten greeting shown while the camera loads.
+const greatVibes = Great_Vibes({
   subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-plex-mono',
+  weight: '400',
+  variable: '--font-script',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: `${site.name} — ${site.role}`,
-  description: site.intro,
+  title: `${person.name} — ${person.title}`,
+  description:
+    'A résumé shot on a 2000s compact camera: product management across agentic AI, consumer fintech and payments at scale.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${instrument.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${openSans.variable} ${shareTech.variable} ${greatVibes.variable}`}>
       <body>{children}</body>
     </html>
   );

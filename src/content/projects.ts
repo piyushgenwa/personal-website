@@ -17,6 +17,8 @@ export interface ProjectBlock {
 
 export interface Project {
   slug: string;
+  /** Placeholder copy from the original scaffold. Kept in the data, never rendered. */
+  draft?: boolean;
   title: string;
   /** One line, lowercase, no period — sits under the title on the card. */
   tagline: string;
@@ -38,7 +40,7 @@ export interface Project {
   screenshots?: { src: string; alt: string }[];
 }
 
-export const projects: Project[] = [
+const all: Project[] = [
   {
     slug: 'trend-pulse',
     title: 'Trend Pulse',
@@ -86,6 +88,55 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: 'flores',
+    title: 'Flores',
+    tagline: 'a tiny quiz for two people, ending in one bouquet',
+    year: '2026',
+    role: 'Design and build',
+    status: 'Shipped',
+    stack: ['Next.js', 'React', 'Vercel'],
+    thumb: '/projects/flores-tile.jpg',
+    accent: 'flare',
+    summary:
+      'Eleven either-or questions decide which flower you are — botanical name, four trait tags and a line of handwriting on a pressed-specimen card. Then you send the card to one person, they answer the same eleven, and the two flowers are tied into a single bouquet addressed to both of you.',
+    metrics: [
+      { value: '11', label: 'either-or questions' },
+      { value: '2', label: 'people to a vase' },
+      { value: '0', label: 'accounts or sign-ups' },
+    ],
+    blocks: [
+      {
+        heading: 'The idea',
+        body: [
+          'Personality quizzes end where they are least interesting: at your own result. Flores treats the result as half of something — a flower is a nice thing to be told you are, but it only becomes a gift once it is beside someone else’s.',
+          'So the quiz is built to be handed on. The result card has one button on it, and that button is addressed to a specific person by name.',
+        ],
+      },
+      {
+        heading: 'How it works',
+        body: [
+          'Eleven forced-choice questions, two options each, no scoring shown while you answer — "there are no wrong answers, only slightly suspiciously specific ones". The result is a pressed-flower card: the common name, the Latin binomial, four trait chips, and a handwritten line that reads like a field note rather than a horoscope.',
+          'Every screen is a URL, so the whole thing runs without accounts or a database. Your flower lives at /f/<flower>, the invitation you send at /with/<flower>, and the finished pair at /b/<flower>-<flower>, with both first names carried in the query string. Names are optional — there is a skip on every step that asks for one.',
+          'When the second person finishes, the two illustrations are composed into one vase, tied with a ribbon, and captioned with a line that reads both flowers against each other. The image can be downloaded or passed on.',
+        ],
+      },
+      {
+        heading: 'What it gets right',
+        body: [
+          'The restraint. It is warm without being cute: a single muted palette, one display serif, a mono voice for the labels, and paper textures that stay in the background. Nothing on screen asks for an email address.',
+          'The copy carries the whole product. Every question is a small scene rather than a trait ("the room is filling up. you…"), and the pairing text is written to flatter both people at once instead of scoring their compatibility.',
+        ],
+      },
+    ],
+    links: [{ label: 'Live', href: 'https://duo-bouquet.vercel.app/' }],
+    screenshots: [
+      { src: '/projects/flores-landing.jpg', alt: 'Flores landing page — "Which flower are you?"' },
+      { src: '/projects/flores-quiz.jpg', alt: 'One of the eleven either-or questions' },
+      { src: '/projects/flores-flower.jpg', alt: 'A result card: Red Rose, Rosa gallica, with trait chips' },
+      { src: '/projects/flores-bouquet.jpg', alt: 'Two flowers tied into one bouquet for both people' },
+    ],
+  },
+  {
     slug: 'sprite-mart',
     title: 'Sprite Mart',
     tagline: 'a character stays the character across every pose',
@@ -122,6 +173,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'ledger',
+    draft: true,
     title: 'Ledger',
     tagline: 'quote reconciliation for buyers who live in spreadsheets',
     year: '2025',
@@ -162,7 +214,43 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: 'growth-secretary',
+    title: 'Growth Secretary',
+    tagline: 'an ops assistant that reads an order update and tells you the next move',
+    year: '2026',
+    role: 'Design and build',
+    status: 'Shipped',
+    stack: ['Gemini', 'Vercel Edge Functions', 'HTML/JS'],
+    thumb: '/projects/growth-secretary.png',
+    accent: 'aqua',
+    summary:
+      'A B2B sourcing team runs each order through a 20-step operating model spanning a CRM, a sourcing platform, spreadsheets, and Slack. Growth Secretary takes a plain-text update from a growth lead, resolves it against the model, and returns one decision card: what step this is, what happens next, and what to prep — never a blocker.',
+    blocks: [
+      {
+        heading: 'The problem',
+        body: [
+          'The operating model was correct but lived only in people\'s heads: which of four order lanes an update belonged to, which of eight recurring jobs it triggered, and which system of record needed updating. Growth leads either knew this cold or asked around, and every order touched five different systems that did not talk to each other.',
+        ],
+      },
+      {
+        heading: 'Approach',
+        body: [
+          'Modeled the operating model explicitly first — as an interactive HTML deck mapping every party, system, and pain point across current and future state — before writing any assistant logic, so the assistant\'s reasoning had a spec to be checked against rather than being reverse-engineered from chat transcripts.',
+          'The assistant itself is a single long system prompt encoding the four order lanes, the twenty-step sequence, and the eight jobs, plus worked examples per job. It grounds each message to an order ID, infers the lane and step, and drafts the artifacts (Slack posts, payment-doc checklists) for the lead to send — flagging missing inputs rather than stopping.',
+        ],
+      },
+      {
+        heading: 'Status',
+        body: [
+          'Shipped as a chat tool the team uses directly. The open piece is the cost/ROI model quantifying time freed per lead — the assistant work came first because it was the part that could be validated by using it.',
+        ],
+      },
+    ],
+    links: [{ label: 'Live demo', href: 'https://sourcy-growth-secretary.vercel.app' }],
+  },
+  {
     slug: 'spec-diff',
+    draft: true,
     title: 'Spec Diff',
     tagline: 'catches the revision nobody mentioned',
     year: '2025',
@@ -195,6 +283,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'freight',
+    draft: true,
     title: 'Freight Napkin',
     tagline: 'landed cost while the buyer is still on the call',
     year: '2024',
@@ -223,6 +312,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'atlas',
+    draft: true,
     title: 'Supplier Atlas',
     tagline: 'one supplier record instead of nine',
     year: '2024',
@@ -260,6 +350,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'quota',
+    draft: true,
     title: 'Quota',
     tagline: 'a scheduler that explains its own decisions',
     year: '2023',
@@ -293,6 +384,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'moodboard',
+    draft: true,
     title: 'Swatch',
     tagline: 'colour matching that accounts for the screen',
     year: '2023',
@@ -320,6 +412,8 @@ export const projects: Project[] = [
     ],
   },
 ];
+
+export const projects: Project[] = all.filter((p) => !p.draft);
 
 export function getProject(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug);

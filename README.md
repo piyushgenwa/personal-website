@@ -1,111 +1,74 @@
-# Personal website
+# Personal website — genwa·shot
 
-Project showcase built with Next.js 16 (App Router), React 19, Tailwind v4, and
-[Paper Design shaders](https://github.com/paper-design/shaders).
+A résumé shot on a 2000s compact camera, in Frutiger Aero. Next.js 16 (App Router),
+React 19, Tailwind v4 (reset only). Everything visual is CSS — no images, no WebGL.
 
 ```bash
 npm run dev        # http://localhost:3000
-npm run build      # production build (statically prerenders every project page)
+npm run build      # statically prerenders every page
 npm run typecheck
-npm run thumbs     # regenerate placeholder project thumbnails
 ```
 
-> **Toolchain note:** `typescript` is pinned to `5.x` on purpose. `typescript@7`
-> (the native port) has a different package layout that Next 16's TypeScript
-> detection can't resolve — `next build` fails with
-> `The "id" argument must be of type string. Received undefined`. Don't bump it
-> to 7 until Next supports it.
+## The camera
 
-## Design direction — "vitrine"
+The home page is a working camera with three screens, like the real thing:
 
-The metaballs are a living specimen; the fluted glass is the display case.
-Everything sits behind glass until you engage with it. In the hero a band of
-glass is **wiped clear** across the middle, and that window is the only place
-the specimen is seen sharply — the type sits on the plate below, so it never
-competes with a moving blob for contrast. Project cards repeat the gesture:
-the glass clears on hover to reveal the work.
+| Screen   | What it is                                          | Controls |
+| -------- | --------------------------------------------------- | -------- |
+| **shoot**  | Viewfinder — your name as the subject, AF brackets that lock green | Shutter / `●` takes the picture → index. `T`/`W` zoom the view |
+| **index**  | The photo roll, 3×3 thumbnails                      | Arrows move, `●` / `T` opens |
+| **photo**  | One role / project / the contact card, with the orange date stamp | `◀ ▶` next picture, `▲ ▼` scroll, `W` back to index |
 
-Palette is cold industrial glass with warm organic light behind it (sodium
-lamps through a glass-block wall). Tokens live in `src/app/globals.css`:
+Shutter from anywhere but the viewfinder returns to it (a real camera's half-press
+does the same). **MENU** opens the list (photo roll, résumé PDF, email, LinkedIn);
+**DISP** hides the on-screen info. Keyboard mirrors the hardware: arrows, `Enter` = ●,
+`Space` = shutter, `M`, `D`, `W`, `T`, `P`, `Esc`. Swipe works on touch.
+`/#roll` and `/#<id>` (e.g. `/#jar`) deep-link to a screen. `prefers-reduced-motion`
+removes the bubbles' drift and the slides.
 
-| Token       | Value     | Role                          |
-| ----------- | --------- | ----------------------------- |
-| `ink`       | `#08110f` | Base — cold green-black       |
-| `panel`     | `#0f1e1f` | Raised surface                |
-| `frost`     | `#d3ded9` | Primary text (cool bone)      |
-| `sodium`    | `#ffa02e` | Primary accent                |
-| `flare`     | `#ff4d5e` | Secondary accent              |
-| `aqua`      | `#35d6c4` | Interactive / links           |
+## Structure
 
-Type: **Bricolage Grotesque** (display) · **Instrument Sans** (body) ·
-**IBM Plex Mono** (data, labels, anything scanned rather than read). The three
-roles are `.t-display`, body default, and `.t-data`.
+- `src/content/book.ts` — the résumé itself (roles, bullets, figures, contact).
+  Edit this when the résumé changes. `figures` must also appear in that role's bullets.
+- `src/content/projects.ts` — case studies at `/work/<slug>`. Entries marked
+  `draft: true` are placeholder copy from the original scaffold and never render.
+- `src/content/roll.ts` — the photo roll: roles + projects + the contact card,
+  in shooting order, each assigned a landscape "scene" and an orange date stamp.
+  Add a role or project and the roll follows.
+- `src/components/CameraBody.tsx` — shell, LCD bezel and controls. Each control is a
+  button (`onClick`) or a link (`href`), so the same body drives the interactive
+  home page and the plain case-study pages.
+- `src/components/Camera.tsx` — the state machine. `lcd.tsx` — what's drawn on the LCD.
+- `src/components/Backdrop.tsx` — sky, hill, bubbles.
+- `src/app/camera.css` — the body as a physical object. `globals.css` — tokens, wallpaper,
+  and everything drawn *on* the LCD.
 
-`--flute` is the flute pitch and doubles as the page grid — structural rules
-and the glass ribbing share it. It narrows to `21px` under 640px.
+## Design
 
-## Adding a project
+Frutiger Aero: bright sky and green hill, glossy aqua glass, glass-bead bullets,
+bubbles. The camera is brushed silver with a blue-gel `●` button. The LCD is dark
+glass with a reflection and faint scanlines. HUD numerals and the date stamp use
+Share Tech Mono; UI text is Open Sans (a free stand-in for Frutiger). The
+"genwa·shot" name is deliberately not a real camera brand.
 
-Add an entry to `projects` in `src/content/projects.ts`. That's it — it appears
-on the index and gets a page at `/work/<slug>` through the shared template at
-`src/app/work/[slug]/page.tsx`. No new components.
+Glass = a bright top half over a deeper bottom half, a hard white edge, and
+`backdrop-filter`. Landscapes on the LCD are layered CSS gradients.
 
-```ts
-{
-  slug: 'my-project',
-  title: 'My Project',
-  tagline: 'one lowercase line, no period',
-  year: '2026',
-  role: 'Design and build',
-  status: 'Shipped',            // Shipped | In progress | Archived | Experiment
-  stack: ['TypeScript', 'Postgres'],
-  thumb: '/projects/my-project.png',
-  accent: 'sodium',             // sodium | flare | aqua
-  featured: true,               // spans the full grid — use for one, not all
-  summary: 'Two or three sentences.',
-  metrics: [{ value: '9 min', label: 'median review' }],  // optional
-  blocks: [{ heading: 'The problem', body: ['…'] }],
-}
-```
+The body is meant to read as a real object, so two rules hold throughout
+`camera.css`:
 
-Your name, headline, intro, and links live in `src/content/site.ts`.
+1. **The metal is lit by the scene it sits in.** Sky above, grass below — so every
+   horizontal surface runs cool white along its top edge and picks up a warm green
+   bounce along its bottom one. A `--curve` overlay darkens both sides so the body
+   reads as a slab that turns away from you, not a flat card.
+2. **Nothing is flat.** Every part is either raised (`--raised`: bright top edge,
+   dark underside, cast shadow) or recessed (`--sunken`: dark top edge, bright
+   bottom edge). Buttons actually travel on `:active`.
 
-### Thumbnails
+The top plate is a real surface — `rotateX(64deg)` on `.deck`, with the shutter and
+power button on it. Anything printed there is pre-stretched by `--deck-squash`
+(1/cos 64° ≈ 2.28) so it prints true once foreshortened. Parts with no function —
+screws, strap lug, microphone, speaker — are `<span aria-hidden>` and never focusable.
 
-`thumb` **must be a raster image** (PNG/JPG). The `FlutedGlass` shader samples
-it as a WebGL texture, and an SVG data URI is not reliably usable as one.
-
-The committed thumbnails are generated placeholders — drop real screenshots at
-the same paths to replace them, or edit `scripts/gen-thumbs.mjs` and run
-`npm run thumbs`.
-
-## The one thing to know about the shaders
-
-**`FlutedGlass` is an image filter, not an overlay.** It takes
-`image?: HTMLImageElement | string` and refracts *that texture*. It cannot
-refract live DOM or an animating WebGL canvas beneath it.
-
-So the site uses two different implementations of the same look:
-
-- **`GlassPane`** (`src/components/GlassPane.tsx`) — fluted glass in CSS, for
-  use over *live* content. Specular flute lighting via `repeating-linear-gradient`
-  plus two depths of `backdrop-filter` blur (valleys blur more than ridges,
-  which is true of real fluted glass). This is what sits over the hero's
-  metaballs and over the footer.
-- **`FlutedThumb`** (`src/components/FlutedThumb.tsx`) — the real
-  `FlutedGlass` shader, used where there *is* an image: project thumbnails and
-  the project page hero. Shader params are plain numbers, so the clear/obscure
-  transition is tweened in JS (`useGlide`) rather than by CSS.
-
-If you want true shader refraction in the hero, the metaballs would need to be
-rendered to a texture first and fed in as an image — not wired up here.
-
-## Performance and accessibility notes
-
-- Each shader is its own WebGL context, so `ProjectCard` only mounts one once
-  the card is within `300px` of the viewport, and keeps a plain `<img>` poster
-  underneath so nothing flashes empty.
-- Cards clear on hover *and* focus. On touch (`(hover: hover)` fails) the glass
-  stays clear, since it would otherwise never open.
-- `prefers-reduced-motion` skips the hero wipe, the scroll reveals, and the
-  card tween.
+> **Toolchain note:** `typescript` is pinned to `5.x` on purpose — `typescript@7`
+> has a different package layout that Next 16 can't resolve yet.

@@ -1,51 +1,28 @@
 @import 'tailwindcss';
 
 /* ==========================================================================
-   VITRINE — design tokens
-   Cold industrial glass, warm organic life behind it.
+   genwa·shot — a 2000s compact camera, in Frutiger Aero.
+   Tokens, the wallpaper, and everything drawn ON the LCD.
+   The camera body itself — shell, top deck, buttons — lives in camera.css.
    ========================================================================== */
 
-@theme {
-  /* Palette */
-  --color-ink: #08110f; /* vitrine base — cold green-black */
-  --color-panel: #0f1e1f; /* raised surface */
-  --color-panel-2: #16292a; /* hover / inset surface */
-  --color-frost: #d3ded9; /* cool bone — primary text */
-  --color-frost-dim: #7f918c; /* secondary text */
-  --color-frost-faint: #46564f; /* hairlines, tertiary */
-  --color-sodium: #ffa02e; /* warm amber — primary accent */
-  --color-flare: #ff4d5e; /* hot coral */
-  --color-aqua: #35d6c4; /* cool teal — interactive */
+:root {
+  color-scheme: light;
 
-  /* Type */
-  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --ink: #0c2740;
+  --ink-soft: #35566f;
+  --sky-deep: #1b7fe0;
+  --aqua: #3fc9f5;
+  --aqua-deep: #0b78c7;
+  --grass: #46b52a;
+  --stamp: #ff8a1f;
+  --silver-hi: #f9fbfc;
+  --silver-mid: #cdd3d9;
+  --silver-lo: #9aa4ae;
 
-  /* The flute pitch is the grid. Everything aligns to it. */
-  --flute: 34px;
-  /* Where the glass is wiped clear. The window onto the specimen. */
-  --band-open-top: 30%;
-  --band-open-bot: 58%;
-
-  --ease-glass: cubic-bezier(0.16, 0.84, 0.28, 1);
+  --font-ui: var(--font-open-sans), 'Segoe UI', Frutiger, 'Helvetica Neue', sans-serif;
+  --font-mono: var(--font-share-tech), ui-monospace, monospace;
 }
-
-/* Registered so the wipe can animate. Unregistered custom props don't tween. */
-@property --band-top {
-  syntax: '<percentage>';
-  inherits: true;
-  initial-value: 50%;
-}
-@property --band-bot {
-  syntax: '<percentage>';
-  inherits: true;
-  initial-value: 50%;
-}
-
-/* ==========================================================================
-   Base
-   ========================================================================== */
 
 *,
 *::before,
@@ -54,286 +31,843 @@
 }
 
 html {
-  scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
-}
-
-/* Narrow screens get a finer pitch, or the ribbing reads as fat stripes.
-   `html:root` outspecifies the `:root` that @theme emits, so this wins
-   regardless of which rule the bundler emits first. */
-@media (max-width: 640px) {
-  html:root {
-    --flute: 21px;
-  }
 }
 
 body {
   margin: 0;
-  background: var(--color-ink);
-  color: var(--color-frost);
-  font-family: var(--font-body);
-  font-size: 1rem;
-  line-height: 1.6;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  background: #4e9ee0;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
-::selection {
-  background: var(--color-sodium);
-  color: var(--color-ink);
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+a {
+  color: inherit;
+}
+.mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-aqua);
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
+  outline: 3px solid var(--stamp);
+  outline-offset: 2px;
 }
 
 /* ==========================================================================
-   Type roles
+   The wallpaper
    ========================================================================== */
 
-.t-display {
-  font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: -0.035em;
-  font-variation-settings: 'wdth' 90;
+.aero {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #4e9ee0 url('/camera/bliss.jpg') center / cover no-repeat;
 }
-
-/* Small caps mono, used for anything the reader scans rather than reads:
-   indices, stack tags, years, labels. */
-.t-data {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-frost-dim);
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 26%, rgb(255 255 255 / 0.95) 0 7%, transparent 22%),
+    radial-gradient(circle at 65% 78%, rgb(255 255 255 / 0.5) 0 6%, transparent 24%),
+    radial-gradient(circle, rgb(150 225 255 / 0.1) 55%, rgb(255 255 255 / 0.55) 100%);
+  box-shadow:
+    inset 0 0 0.6rem rgb(255 255 255 / 0.7),
+    0 0.4rem 1.2rem rgb(0 90 170 / 0.18);
+  border: 1px solid rgb(255 255 255 / 0.65);
+  animation: bob 9s ease-in-out infinite;
 }
-
-.t-lede {
-  font-size: clamp(1.0625rem, 1.6vw, 1.3125rem);
-  line-height: 1.5;
-  color: var(--color-frost-dim);
-  text-wrap: pretty;
+@keyframes bob {
+  50% {
+    transform: translateY(-1.1rem);
+  }
 }
 
 /* ==========================================================================
-   FLUTED GLASS
-   FlutedGlass (the shader) is an image filter — it samples an
-   HTMLImageElement, so it cannot refract the live WebGL canvas underneath it.
-   For the hero we build the pane in CSS instead, which does composite against
-   live content: specular flute lighting + a two-depth backdrop blur.
+   Glass — the Aero panel: bright top half, deeper bottom half, hard white edge
    ========================================================================== */
 
 .glass {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  /* Ribbed specular lighting: bright edge, dark valley, per flute. */
-  background: repeating-linear-gradient(
-    90deg,
-    rgb(255 255 255 / 0) 0px,
-    rgb(255 255 255 / 0.11) 2px,
-    rgb(255 255 255 / 0.02) 7px,
-    rgb(0 0 0 / 0.2) calc(var(--flute) * 0.47),
-    rgb(255 255 255 / 0.02) calc(var(--flute) - 8px),
-    rgb(255 255 255 / 0.15) calc(var(--flute) - 3px),
-    rgb(0 0 0 / 0.34) calc(var(--flute) - 1px),
-    rgb(255 255 255 / 0) var(--flute)
-  );
-
-  backdrop-filter: blur(5px) saturate(1.3) brightness(1.05);
-  -webkit-backdrop-filter: blur(5px) saturate(1.3) brightness(1.05);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.82) 0%, rgb(255 255 255 / 0.58) 46%, rgb(232 249 255 / 0.5) 54%, rgb(215 243 255 / 0.62) 100%);
+  -webkit-backdrop-filter: blur(10px) saturate(1.5);
+  backdrop-filter: blur(10px) saturate(1.5);
+  border: 1px solid rgb(255 255 255 / 0.9);
+  border-radius: 0.9rem;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgb(255 255 255 / 0.35),
+    0 0.5rem 1.4rem rgb(0 70 130 / 0.3);
 }
 
-/* Fluted glass is blurrier in the valleys than at the ridges. A second pane
-   masked to the valleys only gives that depth for one extra composite. */
-.glass-valleys {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  backdrop-filter: blur(13px);
-  -webkit-backdrop-filter: blur(13px);
-  mask-image: repeating-linear-gradient(
-    90deg,
-    transparent 0px,
-    #000 calc(var(--flute) * 0.28),
-    #000 calc(var(--flute) * 0.66),
-    transparent var(--flute)
-  );
+.stage-hint {
+  position: relative;
+  z-index: 1;
+  font-size: 0.8rem;
+  color: #fff;
+  text-shadow: 0 1px 3px rgb(0 60 120 / 0.8);
+  text-align: center;
 }
-
-/* The signature: a wiped-clear band where the glass is absent and the
-   metaballs read sharp. Feathered so it looks rubbed, not cut. */
-.glass-banded {
-  mask-image: linear-gradient(
-    to bottom,
-    #000 0,
-    #000 calc(var(--band-top) - 4%),
-    transparent var(--band-top),
-    transparent var(--band-bot),
-    #000 calc(var(--band-bot) + 4%),
-    #000 100%
-  );
+.stage-hint a {
+  font-weight: 600;
 }
-
-.glass-valleys.glass-banded {
-  mask-image:
-    repeating-linear-gradient(
-      90deg,
-      transparent 0px,
-      #000 calc(var(--flute) * 0.28),
-      #000 calc(var(--flute) * 0.66),
-      transparent var(--flute)
-    ),
-    linear-gradient(
-      to bottom,
-      #000 0,
-      #000 calc(var(--band-top) - 4%),
-      transparent var(--band-top),
-      transparent var(--band-bot),
-      #000 calc(var(--band-bot) + 4%),
-      #000 100%
-    );
-  mask-composite: intersect;
-  -webkit-mask-composite: source-in;
+.stage-hint kbd {
+  display: inline-block;
+  margin: 0 0.15rem 0 0.7rem;
+  padding: 0.05rem 0.5rem;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-shadow: none;
+  border-radius: 0.5rem;
+  background: linear-gradient(180deg, #fff, #cfeeff);
+  box-shadow: 0 1px 2px rgb(0 60 120 / 0.4);
 }
 
 /* ==========================================================================
-   Flute-pitch rules — carries the pane across the whole page
+   On the LCD
    ========================================================================== */
 
-.flute-rules {
+.scr {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.scene {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 62%;
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Landscapes: layered gradients standing in for photographs. */
+.scene-sky {
+  background:
+    radial-gradient(38% 12% at 22% 30%, rgb(255 255 255 / 0.95), transparent 70%),
+    radial-gradient(30% 10% at 72% 20%, rgb(255 255 255 / 0.85), transparent 70%),
+    radial-gradient(120% 55% at 28% 114%, #3fa72a 0 62%, transparent 62.5%),
+    radial-gradient(110% 50% at 96% 120%, #7fd143 0 60%, transparent 60.5%),
+    linear-gradient(180deg, #1f7fe0 0%, #57b4f5 45%, #b8e6ff 72%, #e7f7ff 100%);
+}
+.scene-meadow {
+  background:
+    radial-gradient(34% 10% at 70% 26%, rgb(255 255 255 / 0.9), transparent 70%),
+    radial-gradient(140% 60% at 60% 118%, #6cc22e 0 60%, transparent 60.5%),
+    radial-gradient(90% 44% at 0% 112%, #a8dc4a 0 60%, transparent 60.5%),
+    linear-gradient(180deg, #3fa4ee 0%, #9adbff 55%, #eafcff 100%);
+}
+.scene-ocean {
+  background:
+    radial-gradient(28% 22% at 74% 46%, rgb(255 255 255 / 0.85), transparent 70%),
+    linear-gradient(180deg, #9be6ff 0 44%, #1faaea 44.4%, #0d7bc4 78%, #0a5aa0 100%);
+}
+.scene-dusk {
+  background:
+    radial-gradient(130% 40% at 40% 116%, #123a6e 0 62%, transparent 62.5%),
+    radial-gradient(50% 30% at 50% 66%, rgb(255 226 150 / 0.9), transparent 70%),
+    linear-gradient(180deg, #274a9e 0%, #7f6fc8 40%, #f7a4a8 70%, #ffd89e 100%);
+}
+.scene-lagoon {
+  background:
+    radial-gradient(60% 40% at 30% 60%, rgb(200 255 245 / 0.6), transparent 70%),
+    linear-gradient(180deg, #b9f5f0 0%, #38d3c8 46%, #0a9ab0 100%);
+}
+.scene-orchard {
+  background:
+    radial-gradient(30% 10% at 30% 28%, rgb(255 255 255 / 0.8), transparent 70%),
+    radial-gradient(120% 54% at 70% 116%, #98c92e 0 62%, transparent 62.5%),
+    radial-gradient(100% 44% at 0% 112%, #d9d63a 0 60%, transparent 60.5%),
+    linear-gradient(180deg, #6bbcf0 0%, #c9ecff 60%, #fff6d0 100%);
+}
+.scene-glacier {
+  background:
+    radial-gradient(90% 40% at 20% 100%, #fff 0 50%, transparent 50.5%),
+    radial-gradient(70% 46% at 80% 104%, #dff5ff 0 54%, transparent 54.5%),
+    linear-gradient(180deg, #4f9be0 0%, #b3dcf7 55%, #f2fbff 100%);
+}
+.scene-bloom {
+  background:
+    radial-gradient(40% 30% at 76% 30%, rgb(255 255 255 / 0.7), transparent 70%),
+    radial-gradient(120% 50% at 30% 116%, #59b93a 0 62%, transparent 62.5%),
+    linear-gradient(180deg, #ff8fc8 0%, #ffc8e6 52%, #fff0f8 100%);
+}
+
+/* Zoom pushes toward the face, not the middle of the frame. */
+.scene-vf {
+  transform-origin: 50% 38%;
+}
+
+.has-photo {
+  background-size: cover;
+  background-position: center 40%;
+  background-repeat: no-repeat;
+}
+
+/* HUD */
+.hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.8);
+}
+.hud-top {
+  top: 0;
+  background: linear-gradient(180deg, rgb(5 20 40 / 0.78), rgb(5 20 40 / 0.35));
+}
+.hud-bot {
+  bottom: 0;
+  background: linear-gradient(0deg, rgb(5 20 40 / 0.78), rgb(5 20 40 / 0.35));
+}
+.hud-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.badge {
+  display: inline-block;
+  padding: 0.02rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #0c2740;
+  text-shadow: none;
+  background: linear-gradient(180deg, #fff, #bcd0dd);
+}
+.battery {
+  position: relative;
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  width: 1.6rem;
+  height: 0.8rem;
+  border: 1px solid #fff;
+  border-radius: 2px;
+}
+.battery::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 2px;
+  width: 3px;
+  height: 0.35rem;
+  background: #fff;
+  border-radius: 0 1px 1px 0;
+}
+.battery i {
+  flex: 1;
+  background: #58f06f;
+  box-shadow: 0 0 3px #58f06f;
+}
+
+/* Viewfinder */
+
+/* Keeps the name legible wherever the photo happens to be bright. */
+.vf-scrim {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: repeating-linear-gradient(
-    90deg,
-    rgb(211 222 217 / 0.05) 0px,
-    rgb(211 222 217 / 0.05) 1px,
-    transparent 1px,
-    transparent calc(var(--flute) * 4)
-  );
+  background: linear-gradient(to top, rgb(2 18 38 / 0.82) 0%, rgb(2 18 38 / 0.28) 26%, transparent 48%);
 }
 
-.hairline {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    var(--color-frost-faint) 0%,
-    rgb(70 86 79 / 0.25) 60%,
-    transparent 100%
-  );
-  border: 0;
+.subject {
+  position: absolute;
+  inset: auto 7% 13%;
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  text-align: center;
+  text-shadow: 0 2px 12px rgb(0 20 45 / 0.75);
+}
+.subject-name {
+  font-size: min(10.75cqw, 4.3rem);
+  font-weight: 300;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.subject-role {
+  font-size: min(3.4cqw, 1.35rem);
+  font-weight: 600;
+  color: #fff;
+}
+/* Sized and placed to sit on the face in the frame. */
+/* The viewfinder photo (1800 × 862) is always wider than the screen, so
+   `cover` fits it to the screen's height and crops the sides evenly. This box
+   is that photo, exactly: anything placed in it in % stays on the picture. */
+.vf-frame {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  aspect-ratio: 1800 / 862;
+  transform: translateX(-50%);
+}
+
+/* Around the face in me.jpg: x 41.5–52.5%, y 19–44%. */
+.af {
+  position: absolute;
+  inset: 19% 47.5% 56% 41.5%;
+  color: #fff;
+  transition: color 0.25s;
+}
+.af[data-locked] {
+  color: #5bff6b;
+}
+.af i {
+  position: absolute;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 2px solid currentColor;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.45));
+}
+.af[data-locked] {
+  animation: lock 0.35s ease-out;
+}
+@keyframes lock {
+  from {
+    transform: scale(1.08);
+  }
+}
+.af i:nth-child(1) {
+  top: 0;
+  left: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+.af i:nth-child(2) {
+  top: 0;
+  right: 0;
+  border-left: 0;
+  border-bottom: 0;
+}
+.af i:nth-child(3) {
+  bottom: 0;
+  left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+.af i:nth-child(4) {
+  bottom: 0;
+  right: 0;
+  border-left: 0;
+  border-top: 0;
+}
+.hint {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+.zoombar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.zoombar em {
+  font-style: normal;
+  font-size: 0.7rem;
+}
+.zoombar span {
+  display: inline-flex;
+  gap: 2px;
+}
+.zoombar i {
+  width: 0.55rem;
+  height: 0.5rem;
+  background: rgb(255 255 255 / 0.3);
+}
+.zoombar i[data-on] {
+  background: #fff;
+}
+
+/* Index */
+.scr-index {
+  background: linear-gradient(180deg, #0d2f56, #06172c);
+}
+.index-grid {
+  position: absolute;
+  inset: 2.7rem 0.9rem 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 0.65rem;
+}
+.tile {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid rgb(255 255 255 / 0.75);
+  border-radius: 0.45rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.tile[data-sel] {
+  border-color: var(--stamp);
+  box-shadow: 0 0 0 2px rgb(255 138 31 / 0.55), 0 0 1rem rgb(255 138 31 / 0.6);
+  transform: scale(1.02);
+  z-index: 1;
+}
+.tile-num {
+  position: absolute;
+  top: 0.3rem;
+  left: 0.4rem;
+  font-size: 0.72rem;
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.8);
+}
+.tile-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  padding: 0.35rem 0.5rem;
+  color: var(--ink);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.85), rgb(215 243 255 / 0.85));
+  line-height: 1.15;
+}
+.tile-label b {
+  font-size: 0.86rem;
+}
+.tile-label small {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+
+/* The LCD held upright is too narrow for three across. */
+@container (max-width: 36rem) {
+  .index-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* A folder: the top picture of a small stack, with a folder mark and count. */
+.tile-folder {
+  overflow: visible;
+  box-shadow:
+    0.28rem -0.28rem 0 -0.06rem rgb(255 255 255 / 0.55),
+    0.55rem -0.55rem 0 -0.12rem rgb(255 255 255 / 0.3);
+}
+.tile-folder[data-sel] {
+  box-shadow:
+    0.28rem -0.28rem 0 -0.06rem rgb(255 255 255 / 0.55),
+    0.55rem -0.55rem 0 -0.12rem rgb(255 255 255 / 0.3),
+    0 0 0 2px rgb(255 138 31 / 0.55),
+    0 0 1rem rgb(255 138 31 / 0.6);
+}
+/* `overflow: visible` lets the stack show, so the label keeps the corners itself. */
+.tile-folder .tile-label {
+  border-radius: 0 0 0.3rem 0.3rem;
+}
+.tile-folder .tile-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.folder-ico {
+  position: relative;
+  width: 0.95rem;
+  height: 0.68rem;
+  border-radius: 0.12rem;
+  background: linear-gradient(180deg, #ffe08a, #f5b82e);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+}
+.folder-ico::before {
+  content: '';
+  position: absolute;
+  top: -0.14rem;
+  left: 0;
+  width: 0.42rem;
+  height: 0.2rem;
+  border-radius: 0.1rem 0.1rem 0 0;
+  background: #ffe08a;
+}
+/* An impact number reads as the picture's subject. */
+.tile-label b.tile-figure {
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+
+/* One picture */
+.photo-scroll {
+  position: absolute;
+  inset: 2.6rem 0 3.9rem;
+  overflow-y: auto;
+  padding: 0.9rem 1.2rem 1.2rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.7) transparent;
+  outline-offset: -4px;
+  /* a soft fade at the foot says "there is more" */
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 1.4rem), transparent);
+  mask-image: linear-gradient(#000 calc(100% - 1.4rem), transparent);
+}
+.scr[data-dir='1'] .photo-scroll {
+  animation: in-right 0.34s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.scr[data-dir='-1'] .photo-scroll {
+  animation: in-left 0.34s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes in-right {
+  from {
+    opacity: 0;
+    transform: translateX(7%);
+  }
+}
+@keyframes in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-7%);
+  }
+}
+
+.photo-card {
+  max-width: 41rem;
+  margin: 0 auto;
+  padding: 1.3rem 1.5rem 1.4rem;
+  color: var(--ink);
+}
+.photo-card--wide {
+  max-width: 52rem;
+}
+/* Wide LCD: the words on the left, the numbers on the right. */
+@container (min-width: 34rem) {
+  .photo-card--split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    column-gap: 1.6rem;
+    max-width: none;
+    align-items: start;
+  }
+  .photo-card--split .ph {
+    grid-column: 1 / -1;
+  }
+  .photo-card--split .ps .chips {
+    grid-template-columns: 1fr;
+    margin-top: 0.9rem;
+  }
+  .photo-card--split .orbs {
+    margin-top: 0.2rem;
+  }
+  .photo-card--split .see {
+    margin-top: 0.9rem;
+  }
+}
+/* An impact number: the figure is the whole picture. */
+.figure {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 1.2rem 0 0.6rem;
+  text-align: center;
+}
+.figure-value {
+  font-size: clamp(3.4rem, 18cqw, 6.5rem);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--aqua-deep);
+}
+.figure-label {
+  max-width: 22ch;
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.ps:empty {
+  display: none;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--aqua-deep);
+}
+.photo-title {
+  margin-top: 0.15rem;
+  font-size: clamp(1.5rem, 5.6cqw, 2.4rem);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+.meta {
+  margin-top: 0.3rem;
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+}
+.blurb {
+  margin-top: 0.6rem;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+.lead {
+  margin-top: 0.8rem;
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+.orbs {
+  margin-top: 0.9rem;
+}
+.orbs li {
+  position: relative;
+  margin-top: 0.5rem;
+  padding-left: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.42;
+}
+.orbs li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.38rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #fff 0 12%, #8fe8ff 32%, #1c9be0 78%, #0a68b0);
+  box-shadow: 0 1px 2px rgb(0 60 120 / 0.45);
+}
+.chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+}
+.chip {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.7rem;
+  border: 1px solid #fff;
+  background: linear-gradient(180deg, #f8feff 0%, #cdf2ff 50%, #a9e7ff 52%, #d6f7ff 100%);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgb(0 80 150 / 0.25);
+}
+.chip b {
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: #06589a;
+  white-space: nowrap;
+}
+.chip span {
+  font-size: 0.74rem;
+  line-height: 1.25;
+  color: var(--ink-soft);
+}
+.see {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}
+.gel {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid rgb(255 255 255 / 0.85);
+  border-radius: 1.4rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 0 1px 2px rgb(0 60 120 / 0.7);
+  cursor: pointer;
+  background: linear-gradient(180deg, #8fdfff 0%, #29a8ec 50%, #0a7fd0 52%, #3cbdf5 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8), 0 3px 8px rgb(0 80 160 / 0.4);
+}
+.gel:hover {
+  filter: brightness(1.08) saturate(1.1);
+}
+.gel:active {
+  filter: brightness(0.94);
+}
+.contact {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.2rem;
+}
+.contact span {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.contact a {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #06589a;
+  text-underline-offset: 0.2em;
+}
+
+/* The date imprint every 2000s compact burned into the corner. */
+.stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 2.9rem;
+  z-index: 7;
+  font-size: 1.35rem;
+  color: var(--stamp);
+  text-shadow: 0 0 6px rgb(255 138 31 / 0.85), 0 1px 0 rgb(80 30 0 / 0.6);
+  pointer-events: none;
+}
+
+/* Case study additions */
+.case-block {
+  margin-top: 1.4rem;
+}
+.case-block h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #06589a;
+}
+.case-block p {
+  margin-top: 0.5rem;
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+.prints {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.7rem;
+}
+.print {
+  padding: 0.35rem 0.35rem 0.5rem;
+  background: #fff;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.1), 0 6px 12px -4px rgb(0 60 120 / 0.45);
+}
+.print img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: top;
+}
+.print figcaption {
+  margin-top: 0.35rem;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+/* MENU */
+.menu-ov {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 12;
+  width: min(19rem, 72%);
+  padding: 0.9rem 0.8rem;
+  background: linear-gradient(90deg, rgb(4 20 44 / 0.94), rgb(4 20 44 / 0.82));
+  border-right: 1px solid rgb(255 255 255 / 0.25);
+  animation: in-left 0.22s ease-out;
+}
+.menu-head {
+  margin-bottom: 0.7rem;
+}
+.menu-ov ul {
+  display: grid;
+  gap: 0.25rem;
+}
+.menu-ov button {
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.menu-ov button[data-sel] {
+  border-color: rgb(255 255 255 / 0.8);
+  background: linear-gradient(180deg, #8fdfff 0%, #29a8ec 50%, #0a7fd0 52%, #3cbdf5 100%);
+  text-shadow: 0 1px 2px rgb(0 60 120 / 0.7);
+}
+
+.noscript {
+  max-width: 44rem;
+  margin: 1rem;
+  padding: 1.5rem;
+}
+.noscript h2 {
+  margin-top: 1rem;
+  font-size: 1.05rem;
+}
+.noscript li {
+  margin-top: 0.4rem;
+  font-size: 0.92rem;
 }
 
 /* ==========================================================================
-   Motion — page-load sequence
+   Small screens. The LCD always lays out at its own fixed size and is scaled
+   onto the model, so nothing drawn on it follows the window — size it in cqw.
    ========================================================================== */
 
-@keyframes wipe {
-  from {
-    --band-top: 44%;
-    --band-bot: 44%;
+@media (max-width: 56rem) {
+  .stage-hint.keys {
+    display: none;
   }
-  to {
-    --band-top: var(--band-open-top);
-    --band-bot: var(--band-open-bot);
-  }
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(0.9rem);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.anim-wipe {
-  --band-top: var(--band-open-top);
-  --band-bot: var(--band-open-bot);
-  animation: wipe 1.5s var(--ease-glass) 0.35s both;
-}
-
-/* Label plate: the type below the window sits on this, so it never has to
-   compete with a metaball for contrast. */
-.hero-scrim {
-  position: absolute;
-  inset: calc(var(--band-open-bot) - 3%) 0 0 0;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgb(8 17 15 / 0) 0%,
-    rgb(8 17 15 / 0.58) 17%,
-    rgb(8 17 15 / 0.89) 41%,
-    rgb(8 17 15 / 0.975) 66%,
-    var(--color-ink) 100%
-  );
-}
-
-.anim-rise {
-  animation: rise 0.9s var(--ease-glass) both;
-}
-
-.anim-fade {
-  animation: fade 1.4s ease-out both;
-}
-
-/* Scroll-reveal, progressively enhanced by an IntersectionObserver. */
-.reveal {
-  opacity: 0;
-  transform: translateY(1.5rem);
-  transition:
-    opacity 0.8s var(--ease-glass),
-    transform 0.8s var(--ease-glass);
-}
-
-.reveal[data-shown='true'] {
-  opacity: 1;
-  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  .bubble,
+  .hint,
+  .af[data-locked] {
+    animation: none;
   }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-delay: 0ms !important;
-    transition-duration: 0.01ms !important;
+  .scene,
+  .tile {
+    transition: none;
   }
-
-  .reveal {
-    opacity: 1;
-    transform: none;
-  }
-
-  .anim-wipe {
-    --band-top: var(--band-open-top);
-    --band-bot: var(--band-open-bot);
+  .scr .photo-scroll,
+  .menu-ov {
+    animation: none !important;
   }
 }

@@ -1,21 +1,16 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ProjectHero } from '@/components/ProjectHero';
-import { SiteFooter } from '@/components/SiteFooter';
+import { Backdrop } from '@/components/Backdrop';
+import { CameraBody, type Controls } from '@/components/CameraBody';
+import { person } from '@/content/book';
 import { getProject, projects } from '@/content/projects';
-import { site } from '@/content/site';
+import { locate } from '@/content/roll';
 
 /**
- * The project template. Every entry in `projects` renders through this page —
- * to add a case study, add data, not markup.
+ * A case study, shown on the camera's LCD in playback. The hardware still works:
+ * ◀ ▶ step to the neighbouring picture, W goes back to the index, the shutter
+ * goes home. Every entry in `projects` renders here — add data, not markup.
  */
-
-const ACCENT = {
-  sodium: 'var(--color-sodium)',
-  flare: 'var(--color-flare)',
-  aqua: 'var(--color-aqua)',
-} as const;
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -27,152 +22,120 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) return {};
-
-  return {
-    title: `${project.title} — ${site.name}`,
-    description: project.summary,
-  };
+  return { title: `${project.title} — ${person.name}`, description: project.summary };
 }
 
-export default async function ProjectPage({ params }: Params) {
+const pad = (n: number) => String(n).padStart(2, '0');
+
+export default async function CaseStudy({ params }: Params) {
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
 
-  const index = projects.findIndex((p) => p.slug === project.slug);
-  const next = projects[(index + 1) % projects.length];
-  const accent = ACCENT[project.accent];
+  // ◀ ▶ step through the pictures around this one — its folder's, or the main menu's.
+  const here = locate(slug)!;
+  const i = here.index;
+  const frame = here.frames[i];
+  const prev = here.frames[i - 1];
+  const next = here.frames[i + 1];
+  const back = `/#${here.folder?.id ?? 'roll'}`;
+  const hrefFor = (id: string) => (getProject(id) ? `/work/${id}` : `/#${id}`);
+
+  const controls: Controls = {
+    left: prev ? { href: hrefFor(prev.id) } : undefined,
+    right: next ? { href: hrefFor(next.id) } : undefined,
+    wide: { href: back },
+    play: { href: '/#roll' },
+    center: { href: back },
+    menu: { href: '/#roll' },
+    shutter: { href: '/' },
+  };
 
   return (
-    <main>
-      <div className="mx-auto max-w-[1240px] px-6 sm:px-10">
-        <nav className="flex items-baseline justify-between gap-6 py-7">
-          <Link href="/" className="t-data group text-frost transition-colors hover:text-aqua">
-            <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">
-              ←
-            </span>{' '}
-            {site.name}
-          </Link>
-          <span className="t-data" style={{ color: accent }}>
-            {project.status}
-          </span>
-        </nav>
+    <main className="stage">
+      <Backdrop />
+      <CameraBody controls={controls} lcdLabel={`Case study — ${project.title}`}>
+        <div className="scr">
+          <div className={`scene scene-${frame.scene}`} aria-hidden />
+          <div className="photo-scroll" tabIndex={0}>
+            <article className="photo-card photo-card--wide glass">
+              <p className="eyebrow">Working model · {project.status}</p>
+              <h1 className="photo-title">{project.title}</h1>
+              <p className="meta">
+                {project.year} · {project.role} · {project.stack.join(', ')}
+              </p>
+              <p className="blurb">{project.tagline}</p>
+              <p className="lead">{project.summary}</p>
 
-        <hr className="hairline" />
+              {project.metrics && (
+                <div className="chips">
+                  {project.metrics.map((m) => (
+                    <div key={m.label} className="chip">
+                      <b>{m.value}</b>
+                      <span>{m.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-        <header className="grid gap-x-16 gap-y-8 pt-14 pb-14 lg:grid-cols-[1.35fr_1fr] lg:pt-20">
-          <div>
-            <h1 className="t-display text-[clamp(2.5rem,7vw,5rem)]">{project.title}</h1>
-            <p className="mt-5 max-w-[52ch] text-[clamp(1.0625rem,1.6vw,1.3125rem)] leading-[1.55] text-frost-dim text-pretty">
-              {project.summary}
-            </p>
-          </div>
-
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-6 self-end lg:grid-cols-1">
-            <div>
-              <dt className="t-data">Year</dt>
-              <dd className="mt-1">{project.year}</dd>
-            </div>
-            <div>
-              <dt className="t-data">Role</dt>
-              <dd className="mt-1">{project.role}</dd>
-            </div>
-            <div className="col-span-2 lg:col-span-1">
-              <dt className="t-data">Built with</dt>
-              <dd className="mt-1">{project.stack.join(', ')}</dd>
-            </div>
-          </dl>
-        </header>
-      </div>
-
-      <div className="mx-auto max-w-[1240px] px-6 sm:px-10">
-        <ProjectHero src={project.thumb} alt={`${project.title} interface`} />
-      </div>
-
-      {project.metrics && project.metrics.length > 0 && (
-        <div className="mx-auto max-w-[1240px] px-6 pt-16 sm:px-10">
-          <dl className="grid grid-cols-1 gap-x-8 gap-y-8 border-t border-frost-faint/40 pt-8 sm:grid-cols-3">
-            {project.metrics.map((metric) => (
-              <div key={metric.label}>
-                <dt className="t-display text-[clamp(1.75rem,3.4vw,2.75rem)]" style={{ color: accent }}>
-                  {metric.value}
-                </dt>
-                <dd className="t-data mt-2">{metric.label}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      )}
-
-      <div className="mx-auto max-w-[1240px] px-6 py-24 sm:px-10 sm:py-28">
-        <div className="space-y-16">
-          {project.blocks.map((block) => (
-            <section key={block.heading} className="grid gap-x-16 gap-y-4 lg:grid-cols-[1fr_2.1fr]">
-              <h2 className="t-data pt-1.5 lg:sticky lg:top-8 lg:self-start">{block.heading}</h2>
-              <div className="max-w-[64ch] space-y-5">
-                {block.body.map((para) => (
-                  <p key={para} className="text-[clamp(1.0625rem,1.5vw,1.1875rem)] leading-[1.66]">
-                    {para}
-                  </p>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
-        {project.screenshots && project.screenshots.length > 0 && (
-          <div className="mt-16 border-t border-frost-faint/40 pt-8">
-            <h2 className="t-data">Sample output</h2>
-            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {project.screenshots.map((shot) => (
-                <a
-                  key={shot.src}
-                  href={shot.src}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block overflow-hidden border border-frost-faint/40 transition-opacity hover:opacity-80"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={shot.src} alt={shot.alt} className="aspect-[4/3] w-full object-cover object-top" />
-                </a>
+              {project.blocks.map((b) => (
+                <section key={b.heading} className="case-block">
+                  <h2>{b.heading}</h2>
+                  {b.body.map((para) => (
+                    <p key={para}>{para}</p>
+                  ))}
+                </section>
               ))}
-            </div>
-          </div>
-        )}
 
-        {project.links && project.links.length > 0 && (
-          <div className="mt-16 flex flex-wrap gap-x-7 gap-y-3 border-t border-frost-faint/40 pt-8">
-            {project.links.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer"
-                className="t-data text-frost transition-colors hover:text-aqua"
-              >
-                {link.label} ↗
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
+              {project.screenshots && (
+                <section className="case-block">
+                  <h2>Sample output</h2>
+                  <div className="prints">
+                    {project.screenshots.map((s, n) => (
+                      <figure key={s.src} className="print">
+                        <a href={s.src} target="_blank" rel="noreferrer">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={s.src} alt={s.alt} loading="lazy" />
+                        </a>
+                        <figcaption>
+                          {i + 1}.{n + 1} — {s.alt}
+                        </figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                </section>
+              )}
 
-      {/* Next project — keeps the reader inside the case rather than bouncing. */}
-      <div className="mx-auto max-w-[1240px] px-6 sm:px-10">
-        <Link href={`/work/${next.slug}`} className="group block border-t border-frost-faint/40 py-12">
-          <span className="t-data">Next project</span>
-          <div className="mt-3 flex items-baseline justify-between gap-6">
-            <h2 className="t-display text-[clamp(1.75rem,4.4vw,3rem)] transition-colors group-hover:text-sodium">
-              {next.title}
-            </h2>
-            <span className="t-display shrink-0 text-[clamp(1.5rem,3vw,2rem)] transition-transform duration-300 group-hover:translate-x-2">
-              →
+              {project.links && (
+                <p className="see">
+                  {project.links.map((l) => (
+                    <a key={l.label} className="gel" href={l.href} target="_blank" rel="noreferrer">
+                      {l.label} ↗
+                    </a>
+                  ))}
+                </p>
+              )}
+            </article>
+          </div>
+          <span className="stamp mono">{frame.stamp}</span>
+          <div className="hud hud-top">
+            <span>
+              <b className="badge">▶</b> <span className="mono">{`${pad(i + 1)}/${pad(here.frames.length)}`}</span>
+            </span>
+            <span className="hud-right">
+              <span className="mono">12M</span>
+              <span className="battery" aria-hidden>
+                <i />
+                <i />
+                <i />
+              </span>
             </span>
           </div>
-        </Link>
-      </div>
-
-      <SiteFooter />
+        </div>
+      </CameraBody>
+      <p className="stage-hint">
+        <a href={back}>← Back to {here.folder ? here.folder.label : 'the photo roll'}</a>
+      </p>
     </main>
   );
 }
