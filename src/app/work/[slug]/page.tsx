@@ -14,8 +14,9 @@ import { locate } from '@/content/roll';
 
 type Params = { params: Promise<{ slug: string }> };
 
+// Only projects that are somewhere on the camera get a page.
 export function generateStaticParams() {
-  return projects.map((project) => ({ slug: project.slug }));
+  return projects.filter((p) => locate(p.slug)).map((project) => ({ slug: project.slug }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -30,10 +31,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
 export default async function CaseStudy({ params }: Params) {
   const { slug } = await params;
   const project = getProject(slug);
-  if (!project) notFound();
+  const here = locate(slug);
+  if (!project || !here) notFound();
 
   // ◀ ▶ step through the pictures around this one — its folder's, or the main menu's.
-  const here = locate(slug)!;
   const i = here.index;
   const frame = here.frames[i];
   const prev = here.frames[i - 1];

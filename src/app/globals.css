@@ -424,6 +424,9 @@ a {
   inset: 2.7rem 0.9rem 2.5rem;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Always room for three rows, so a short folder keeps full-size tiles
+     instead of stretching one row down the screen. */
+  grid-template-rows: repeat(3, minmax(0, 1fr));
   grid-auto-rows: minmax(0, 1fr);
   gap: 0.65rem;
 }
@@ -521,6 +524,18 @@ a {
   border-radius: 0.1rem 0.1rem 0 0;
   background: #ffe08a;
 }
+/* A tile that leaves the camera for a live site. */
+.tile-out {
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: rgb(8 30 55 / 0.7);
+  font-family: inherit;
+  font-weight: 700;
+}
+
 /* An impact number reads as the picture's subject. */
 .tile-label b.tile-figure {
   font-size: 1.15rem;

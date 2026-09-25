@@ -11,7 +11,8 @@ import { IndexScreen, MenuOverlay, PhotoScreen, ShootScreen, type MenuItem } fro
  *
  *   shoot  → viewfinder. Shutter (or ●) takes "the picture" and lands on…
  *   index  → the main menu: folders, one per job, and loose pictures. ● / T
- *            opens a folder (its own index) or a picture. W backs out of a folder.
+ *            opens a folder (its own index), a picture, or — for a link tile —
+ *            the live site in a new tab. W backs out of a folder.
  *   photo  → one picture. ◀ ▶ step through the pictures around it — within its
  *            folder, never out of it. ▲ ▼ scroll, W goes back to the index it came from.
  *
@@ -41,7 +42,7 @@ export function Camera() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const busy = useRef(false);
 
-  const items = (folder && getFolder(folder)?.frames) || menu;
+  const items = (folder && getFolder(folder)?.items) || menu;
   const here = locate(shot);
 
   const setHash = (h: string) => {
@@ -68,7 +69,7 @@ export function Camera() {
     if (!where) return;
     setFolder(where.folder?.id ?? null);
     // Coming back out lands the cursor on this picture.
-    setSel((where.folder ? where.folder.frames : menu).findIndex((e) => e.id === id));
+    setSel((where.folder ? where.folder.items : menu).findIndex((e) => e.id === id));
     setShot(id);
     setDir(d);
     setScreen('photo');
@@ -84,6 +85,7 @@ export function Camera() {
     const e = items[i];
     if (!e) return;
     if (e.kind === 'folder') toIndex(e.id, 0);
+    else if (e.kind === 'link') window.open(e.href, '_blank', 'noopener,noreferrer');
     else toPhoto(e.id);
   };
 
