@@ -23,6 +23,29 @@ export interface Role {
   figures?: Figure[];
 }
 
+/**
+ * What a job's folder holds, when it is spelled out rather than derived from
+ * the role's figures and plates.
+ */
+export type FolderItem =
+  /** A picture that opens: what I did there, told like a role. */
+  | {
+      kind: 'work';
+      id: string;
+      /** On the tile. */
+      label: string;
+      sub: string;
+      /** On the picture. */
+      title: string;
+      blurb?: string;
+      bullets: string[];
+      /** Only use numbers that also appear in `bullets`. */
+      figures?: Figure[];
+      photo?: string;
+    }
+  /** A tile that leaves the camera for a live URL. Not a picture: ◀ ▶ skip it. */
+  | { kind: 'link'; id: string; label: string; sub: string; href: string; photo: string };
+
 export interface Chapter {
   id: string;
   numeral: string;
@@ -35,6 +58,8 @@ export interface Chapter {
   plates?: string[];
   /** Shown as a single picture on the main menu instead of a folder. */
   single?: boolean;
+  /** The folder's contents, in order, replacing the ones derived from `figures` and `plates`. */
+  folder?: FolderItem[];
 }
 
 export const person = {
@@ -76,6 +101,42 @@ export const chapters: Chapter[] = [
       },
     ],
     plates: ['trend-pulse', 'growth-secretary'],
+    folder: [
+      {
+        kind: 'work',
+        id: 'sourcy-orchestration',
+        label: 'What I worked on',
+        sub: 'Orchestration, core agentic product',
+        title: 'Orchestration for Sourcy’s agentic product',
+        blurb: 'Agentic sourcing platform for founders building D2C brands developing highly custom products',
+        bullets: [
+          'Led development of the orchestration layer of Sourcy’s customer-facing agentic product (200 conversations/day), reducing human involvement and reducing per-request TAT by >70%.',
+          'Built the evaluation framework (50+ golden traces, LLM-as-judge rubric) used to gate skill changes and product updates for the orchestration layer responsible for decision making across 7 agents.',
+        ],
+        figures: [
+          { value: '>70%', label: 'less turnaround per request' },
+          { value: '200', label: 'conversations a day' },
+          { value: '50+', label: 'golden traces gating every change' },
+        ],
+        photo: '/photos/sourcy.jpg',
+      },
+      {
+        kind: 'link',
+        id: 'sourcy-site',
+        label: 'sourcy.ai',
+        sub: 'The product',
+        href: 'https://sourcy.ai',
+        photo: '/photos/sourcy-site.jpg',
+      },
+      {
+        kind: 'link',
+        id: 'sourcy-trends',
+        label: 'trends.sourcy.ai',
+        sub: 'Trends research',
+        href: 'https://trends.sourcy.ai',
+        photo: '/photos/sourcy-trends.jpg',
+      },
+    ],
   },
   {
     id: 'jar',

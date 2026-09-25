@@ -35,9 +35,25 @@ function BottomBar({ children }: { children: ReactNode }) {
 
 /* ───────────────────────── Shooting mode ───────────────────────── */
 
-export function ShootScreen({ zoom, disp, locked }: { zoom: number; disp: boolean; locked: boolean }) {
+export function ShootScreen({
+  zoom,
+  disp,
+  locked,
+  onShoot,
+}: {
+  zoom: number;
+  disp: boolean;
+  locked: boolean;
+  /** Clicking anywhere on the viewfinder takes the picture. */
+  onShoot?: () => void;
+}) {
   return (
-    <div className="scr">
+    <div
+      className={`scr${onShoot ? ' scr-shoot' : ''}`}
+      onClick={onShoot}
+      role={onShoot ? 'button' : undefined}
+      aria-label={onShoot ? 'Take the picture' : undefined}
+    >
       {/* The camera is pointed at its owner. Zooming pushes into the frame. */}
       <div
         className="scene scene-vf has-photo"
@@ -83,7 +99,10 @@ export function ShootScreen({ zoom, disp, locked }: { zoom: number; disp: boolea
               </span>
               <em>T</em>
             </span>
-            <span className="hint">Press the shutter ●</span>
+            <span className="hint">
+              <span className="on-pointer">Click or scroll to shoot ●</span>
+              <span className="on-touch">Tap or swipe to shoot ●</span>
+            </span>
             <span className="mono">2026 · 09</span>
           </BottomBar>
         </>
@@ -125,7 +144,11 @@ export function IndexScreen({
           >
             {e.kind === 'folder' ? (
               <span className="tile-num mono">
-                <i className="folder-ico" aria-hidden /> {e.frames.length}
+                <i className="folder-ico" aria-hidden /> {e.items.length}
+              </span>
+            ) : e.kind === 'link' ? (
+              <span className="tile-num tile-out" aria-label="Opens in a new tab">
+                ↗
               </span>
             ) : (
               <span className="tile-num mono">{pad(i + 1)}</span>
@@ -153,7 +176,7 @@ export function IndexScreen({
           />
           <BottomBar>
             <span>◀▶▲▼ Select</span>
-            <span>● {items[sel]?.kind === 'folder' ? 'Open' : 'View'}</span>
+            <span>● {({ folder: 'Open', link: 'Visit ↗' } as Record<string, string>)[items[sel]?.kind] ?? 'View'}</span>
             <span>{inFolder ? 'W Back' : 'MENU'}</span>
           </BottomBar>
         </>
@@ -166,6 +189,8 @@ function tileSub(e: Entry) {
   switch (e.kind) {
     case 'folder':
     case 'role':
+    case 'work':
+    case 'link':
       return e.sub;
     case 'figure':
       return e.figure.label;
@@ -228,6 +253,32 @@ function FrameBody({ frame, onJump }: { frame: Frame; onJump: (id: string) => vo
               })}
             </p>
           )}
+        </aside>
+      </>
+    );
+  }
+
+  if (frame.kind === 'work') {
+    const { chapter, role, work } = frame;
+    return (
+      <>
+        <header className="ph">
+          <p className="eyebrow">{chapter.title} · What I worked on</p>
+          <h2 className="photo-title">{work.title}</h2>
+          <p className="meta">
+            {role.title} · {role.dates}
+          </p>
+          {work.blurb && <p className="blurb">{work.blurb}</p>}
+        </header>
+        <div className="pm">
+          <ul className="orbs">
+            {work.bullets.map((b) => (
+              <li key={b}>{b}</li>
+            ))}
+          </ul>
+        </div>
+        <aside className="ps" aria-label="Highlights">
+          {work.figures && <Chips items={work.figures} />}
         </aside>
       </>
     );
@@ -330,7 +381,7 @@ export function PhotoScreen({
         aria-hidden
       />
       <div className="photo-scroll" ref={scrollRef} tabIndex={0}>
-        <article className={`photo-card glass${frame.kind === 'role' || frame.kind === 'project' ? ' photo-card--split' : ''}`}>
+        <article className={`photo-card glass${frame.kind === 'role' || frame.kind === 'work' || frame.kind === 'project' ? ' photo-card--split' : ''}`}>
           <FrameBody frame={frame} onJump={onJump} />
         </article>
       </div>

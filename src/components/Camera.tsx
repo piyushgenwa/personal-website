@@ -9,9 +9,11 @@ import { IndexScreen, MenuOverlay, PhotoScreen, ShootScreen, type MenuItem } fro
 /**
  * The working camera. Three screens, like the real thing:
  *
- *   shoot  → viewfinder. Shutter (or ●) takes "the picture" and lands on…
+ *   shoot  → viewfinder. Shutter, ●, a click on the screen, or the visit's
+ *            first scroll or swipe down takes "the picture" and lands on…
  *   index  → the main menu: folders, one per job, and loose pictures. ● / T
- *            opens a folder (its own index) or a picture. W backs out of a folder.
+ *            opens a folder (its own index), a picture, or — for a link tile —
+ *            the live site in a new tab. W backs out of a folder.
  *   photo  → one picture. ◀ ▶ step through the pictures around it — within its
  *            folder, never out of it. ▲ ▼ scroll, W goes back to the index it came from.
  *
@@ -41,7 +43,7 @@ export function Camera() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const busy = useRef(false);
 
-  const items = (folder && getFolder(folder)?.frames) || menu;
+  const items = (folder && getFolder(folder)?.items) || menu;
   const here = locate(shot);
 
   const setHash = (h: string) => {
@@ -68,7 +70,7 @@ export function Camera() {
     if (!where) return;
     setFolder(where.folder?.id ?? null);
     // Coming back out lands the cursor on this picture.
-    setSel((where.folder ? where.folder.frames : menu).findIndex((e) => e.id === id));
+    setSel((where.folder ? where.folder.items : menu).findIndex((e) => e.id === id));
     setShot(id);
     setDir(d);
     setScreen('photo');
@@ -84,6 +86,7 @@ export function Camera() {
     const e = items[i];
     if (!e) return;
     if (e.kind === 'folder') toIndex(e.id, 0);
+    else if (e.kind === 'link') window.open(e.href, '_blank', 'noopener,noreferrer');
     else toPhoto(e.id);
   };
 
@@ -102,6 +105,45 @@ export function Camera() {
       busy.current = false;
     }, FLASH_MS);
   }, [toIndex]);
+
+  // The first scroll or swipe down after the camera appears takes the picture —
+  // the page doesn't scroll, so that gesture has nothing better to do. Once only.
+  const [live, setLive] = useState(false);
+  const onShown = useCallback(() => setLive(true), []);
+  const swiped = useRef(false);
+  const shootRef = useRef(false);
+  shootRef.current = live && screen === 'shoot' && !menuOpen;
+  useEffect(() => {
+    const fire = () => {
+      if (swiped.current || !shootRef.current) return;
+      swiped.current = true;
+      capture();
+    };
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY > 10) fire();
+    };
+    let start: { x: number; y: number } | null = null;
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      start = t ? { x: t.clientX, y: t.clientY } : null;
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      const t = e.changedTouches[0];
+      if (!start || !t) return;
+      // A swipe down the page is the finger moving up.
+      const dy = start.y - t.clientY;
+      if (dy > 40 && Math.abs(t.clientX - start.x) < dy) fire();
+      start = null;
+    };
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [capture]);
 
   // Autofocus: the brackets go white → green shortly after the viewfinder appears.
   useEffect(() => {
@@ -241,8 +283,8 @@ export function Camera() {
 
   return (
     <div onPointerDown={onPointerDown} onPointerUp={onPointerUp} style={{ display: 'contents' }}>
-      <CameraBody controls={controls} flash={flash} lcdLabel={`Camera screen — ${screen}`}>
-        {screen === 'shoot' && <ShootScreen zoom={zoom} disp={disp} locked={locked} />}
+      <CameraBody controls={controls} flash={flash} lcdLabel={`Camera screen — ${screen}`} onShown={onShown}>
+        {screen === 'shoot' && <ShootScreen zoom={zoom} disp={disp} locked={locked} onShoot={capture} />}
         {screen === 'index' && (
           <IndexScreen title={title} items={items} sel={sel} disp={disp} inFolder={!!folder} onPick={open} />
         )}
