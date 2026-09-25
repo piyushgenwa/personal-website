@@ -232,6 +232,7 @@ function Model({
         <>
           <Html
             transform
+            wrapperClass="lcd-mount"
             position={screen.center}
             rotation={portrait ? screen.upright : screen.level}
             distanceFactor={screen.distanceFactor}

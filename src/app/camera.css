@@ -110,10 +110,20 @@
    set inline from the screen's own size.
    -------------------------------------------------------------------------- */
 
+/* drei's box around the screen. It must never scroll: the screen sits in it
+   through a 3D transform, so the browser sees the screen's layout box poking
+   out and will scroll the box to reveal a focused element — and perspective
+   turns a 2px scroll into the screen sliding off the model. `clip` crops the
+   same as `hidden` but can't be scrolled at all. */
+.lcd-mount {
+  overflow: clip !important;
+}
+
 .lcd {
   container-type: inline-size;
   position: relative;
-  overflow: hidden;
+  /* Clip, not hidden, for the same reason: nothing should scroll the screen. */
+  overflow: clip;
   background: #06172c;
   color: #fff;
   line-height: 1.5;
