@@ -387,11 +387,14 @@ export function CameraBody({
   controls,
   flash = false,
   lcdLabel = 'Camera screen',
+  onShown,
 }: {
   children: ReactNode;
   controls: Controls;
   flash?: boolean;
   lcdLabel?: string;
+  /** Called once the camera is on screen — drawn, and past the greeting. */
+  onShown?: () => void;
 }) {
   const router = useRouter();
   const [host, setHost] = useState<HTMLDivElement | null>(null);
@@ -415,8 +418,10 @@ export function CameraBody({
   }, [greet]);
   const shown = ready && written;
   useEffect(() => {
-    if (shown) greeted = true;
-  }, [shown]);
+    if (!shown) return;
+    greeted = true;
+    onShown?.();
+  }, [shown, onShown]);
 
   const portrait = usePortrait();
 

@@ -35,9 +35,25 @@ function BottomBar({ children }: { children: ReactNode }) {
 
 /* ───────────────────────── Shooting mode ───────────────────────── */
 
-export function ShootScreen({ zoom, disp, locked }: { zoom: number; disp: boolean; locked: boolean }) {
+export function ShootScreen({
+  zoom,
+  disp,
+  locked,
+  onShoot,
+}: {
+  zoom: number;
+  disp: boolean;
+  locked: boolean;
+  /** Clicking anywhere on the viewfinder takes the picture. */
+  onShoot?: () => void;
+}) {
   return (
-    <div className="scr">
+    <div
+      className={`scr${onShoot ? ' scr-shoot' : ''}`}
+      onClick={onShoot}
+      role={onShoot ? 'button' : undefined}
+      aria-label={onShoot ? 'Take the picture' : undefined}
+    >
       {/* The camera is pointed at its owner. Zooming pushes into the frame. */}
       <div
         className="scene scene-vf has-photo"
@@ -83,7 +99,10 @@ export function ShootScreen({ zoom, disp, locked }: { zoom: number; disp: boolea
               </span>
               <em>T</em>
             </span>
-            <span className="hint">Press the shutter ●</span>
+            <span className="hint">
+              <span className="on-pointer">Click or scroll to shoot ●</span>
+              <span className="on-touch">Tap or swipe to shoot ●</span>
+            </span>
             <span className="mono">2026 · 09</span>
           </BottomBar>
         </>
