@@ -388,6 +388,22 @@ a {
 .hint {
   animation: pulse 1.6s ease-in-out infinite;
 }
+/* The viewfinder is the shutter: click or tap anywhere on it. */
+.scr-shoot {
+  cursor: pointer;
+}
+/* Say "tap" to touch screens and "click" to everyone else. */
+.on-touch {
+  display: none;
+}
+@media (hover: none) {
+  .on-pointer {
+    display: none;
+  }
+  .on-touch {
+    display: inline;
+  }
+}
 @keyframes pulse {
   50% {
     opacity: 0.45;
