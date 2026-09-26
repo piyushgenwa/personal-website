@@ -20,6 +20,8 @@ export type Scene = 'sky' | 'meadow' | 'ocean' | 'dusk' | 'lagoon' | 'orchard' |
 /** Real photographs, by frame or folder id. Anything without one gets a painted scene. */
 const PHOTOS: Record<string, string> = {
   sourcy: '/photos/sourcy.jpg', // Supertree Grove, Singapore
+  jar: '/photos/jar.jpg', // Rocketeer of the Month
+  unacademy: '/photos/unacademy.jpg', // sunset from the office roof
   flores: '/projects/flores-tile.jpg', // the bouquet, cropped out of the page
 };
 
@@ -36,7 +38,13 @@ interface Base {
   sub: string;
 }
 
-type Work = Extract<FolderItem, { kind: 'work' }>;
+/** A work picture's story, with anything it left out filled in from its role. */
+export interface Work {
+  title: string;
+  blurb?: string;
+  bullets: string[];
+  figures?: Figure[];
+}
 
 /** A picture: opens on the photo screen, and ◀ ▶ step between them. */
 export type Frame =
@@ -88,15 +96,22 @@ const claimed = new Set(chapters.flatMap((c) => c.plates ?? []));
 
 /** A folder's contents as book.ts spells them out. */
 function listed(c: Chapter, items: FolderItem[]): (Frame | Link)[] {
-  const role = c.roles[0];
-  return items.map((it) =>
-    it.kind === 'work'
-      ? dress<Frame>(
-          { id: it.id, kind: 'work', stamp: stampOf(role.dates), label: it.label, sub: it.sub, chapter: c, role, work: it },
-          it.photo,
-        )
-      : dress<Link>({ id: it.id, kind: 'link', stamp: '', label: it.label, sub: it.sub, href: it.href }, it.photo),
-  );
+  return items.map((it) => {
+    if (it.kind === 'link') {
+      return dress<Link>({ id: it.id, kind: 'link', stamp: '', label: it.label, sub: it.sub, href: it.href }, it.photo);
+    }
+    const role = c.roles[it.role ?? 0];
+    const work: Work = {
+      title: it.title,
+      blurb: it.blurb ?? role.blurb,
+      bullets: it.bullets ?? role.bullets,
+      figures: it.figures ?? role.figures,
+    };
+    return dress<Frame>(
+      { id: it.id, kind: 'work', stamp: stampOf(role.dates), label: it.label, sub: it.sub, chapter: c, role, work },
+      it.photo,
+    );
+  });
 }
 
 /** A folder's contents derived from the job: its impact numbers, then its projects. */
