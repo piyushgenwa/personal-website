@@ -28,17 +28,22 @@ export interface Role {
  * the role's figures and plates.
  */
 export type FolderItem =
-  /** A picture that opens: what I did there, told like a role. */
+  /**
+   * A picture that opens: what I did there, told like a role. Blurb, bullets
+   * and figures default to those of `roles[role]`; give them to pick a subset.
+   */
   | {
       kind: 'work';
       id: string;
+      /** Which of the chapter's roles this is about. Defaults to the first. */
+      role?: number;
       /** On the tile. */
       label: string;
       sub: string;
       /** On the picture. */
       title: string;
       blurb?: string;
-      bullets: string[];
+      bullets?: string[];
       /** Only use numbers that also appear in `bullets`. */
       figures?: Figure[];
       photo?: string;
@@ -164,6 +169,24 @@ export const chapters: Chapter[] = [
         ],
       },
     ],
+    folder: [
+      {
+        kind: 'work',
+        id: 'jar-work',
+        label: 'What I worked on',
+        sub: 'GenAI and activation',
+        title: 'GenAI and activation at Jar',
+        photo: '/photos/jar.jpg',
+      },
+      {
+        kind: 'link',
+        id: 'jar-site',
+        label: 'myjar.app',
+        sub: 'The app',
+        href: 'https://www.myjar.app',
+        photo: '/photos/jar-site.jpg',
+      },
+    ],
   },
   {
     id: 'unacademy',
@@ -207,6 +230,33 @@ export const chapters: Chapter[] = [
           { value: '120%', label: 'conversion lift, Daily Scholarship Test' },
           { value: '67%', label: 'more revenue from loans' },
         ],
+      },
+    ],
+    folder: [
+      {
+        kind: 'work',
+        id: 'unacademy-pm',
+        role: 0,
+        label: 'Product Manager',
+        sub: 'Activation, retention, conversion',
+        title: 'Activation, retention and conversion',
+        photo: '/photos/unacademy.jpg',
+      },
+      {
+        kind: 'work',
+        id: 'unacademy-apm',
+        role: 1,
+        label: 'Associate Product Manager',
+        sub: 'Growth and payments',
+        title: 'Growth and payments',
+      },
+      {
+        kind: 'link',
+        id: 'unacademy-site',
+        label: 'unacademy.com',
+        sub: 'The platform',
+        href: 'https://unacademy.com',
+        photo: '/photos/unacademy-site.jpg',
       },
     ],
   },
